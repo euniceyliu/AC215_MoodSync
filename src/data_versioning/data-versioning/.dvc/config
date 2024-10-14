@@ -1,6 +1,8 @@
 [core]
-    remote = prompt_playlist_data
+    remote = prompts.txt
 ['remote "cheese_dataset"']
     url = gs://chse-app-data-versioning/dvc_store
 ['remote "prompt_playlist_data"']
+    url = gs://prompt-playlist-data/dvc_store
+['remote "prompts.txt"']
     url = gs://prompt-playlist-data/dvc_store
