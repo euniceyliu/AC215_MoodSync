@@ -1,3 +1,0 @@
-Dataset Version: v1
-Date: 2024-10-13
-Description: Used ChatGPT with the following prompt to generate natural language playlist requests: "Here is a list of playlist titles and descriptions. For each row in the data, use the information from the title and description of each playlist to generate a unique natural language prompt that a user would input into a AI Playlist generator app to generate their playlist of interest. An example prompt could be "Can you make me a playlist that's cozy and filled with songs that warm up the atmosphere?" Do this for every playlist in the provided dataset and give me a table containing the generated prompt along with the original title and description."
