@@ -1,24 +1,53 @@
-#!/bin/bash
+# Use the official Debian-hosted Python image
+FROM python:3.11-slim-bookworm
 
-# exit immediately if a command exits with a non-zero status
-set -e
+ARG DEBIAN_PACKAGES="build-essential git screen vim"
 
-# Set vairables
-export BASE_DIR=$(pwd)
-export PERSISTENT_DIR=$(pwd)/../persistent-folder/
-export SECRETS_DIR=$(pwd)/../secrets/
-export GCP_PROJECT="ac215-mood-sync" # CHANGE TO YOUR PROJECT ID
-export GOOGLE_APPLICATION_CREDENTIALS="/secrets/llm-service-account.json"
-export IMAGE_NAME="llm-rag-cli"
+# Prevent apt from showing prompts
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Python wants UTF-8 locale
+ENV LANG=C.UTF-8
+
+# Tell pipenv where the shell is. This allows us to use "pipenv shell" as a
+# container entry point.
+ENV PYENV_SHELL=/bin/bash
+
+# Tell Python to disable buffering so we don't lose any logs.
+ENV PYTHONUNBUFFERED=1
+
+# Ensure we have an up to date baseline, install dependencies and
+# create a user so we don't run the app as root
+RUN set -ex; \
+    for i in $(seq 1 8); do mkdir -p "/usr/share/man/man${i}"; done && \
+    apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends $DEBIAN_PACKAGES && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    pip install --no-cache-dir --upgrade pip && \
+    pip install --upgrade pipenv && \
+    useradd -ms /bin/bash app -d /home/app -u 1000 -p "$(openssl passwd -1 Passw0rd)" && \
+    mkdir -p /app && \
+    mkdir -p /persistent && \
+    chown app:app /persistent && \
+    chown app:app /app
 
 
-# Create the network if we don't have it yet
-    # network is needed for using multiple services together; ">/dev/null 2>&1" mute errors;
-    # inspect network OR|| create network if not found
-docker network inspect llm-rag-network >/dev/null 2>&1 || docker network create llm-rag-network
+# Switch to the new user
+WORKDIR /app
 
-# Build the image based on the Dockerfile
-docker build -t $IMAGE_NAME -f Dockerfile .
+# Install python packages
+ADD --chown=app:app Pipfile /app/ 
+    ##Pipfile.lock
 
-# Run All Containers
-docker-compose run --rm --service-ports $IMAGE_NAME
+RUN pipenv --clear
+RUN pipenv lock --verbose
+# RUN pipenv sync if already exists
+
+# Add the rest of the source code. This is done last so we don't invalidate all
+# layers when we change a line of code.
+ADD --chown=app:app . /app
+
+# Entry point
+ENTRYPOINT ["/bin/bash","./docker-entrypoint.sh"]
