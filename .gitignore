@@ -1,6 +1,6 @@
-# ignore API passwords
-/docker-volumes
-/src/secrets
+# ignore API passwords -- note /secrets ignore the folder not the content, /secrets/ would ignore all
+/docker-volumes/
+/src/secrets/
 
 #ignore DS store to avoid computer-specific version pull/push issues
 .DS_Store
