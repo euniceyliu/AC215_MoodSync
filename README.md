@@ -1,40 +1,8 @@
-## Milestone 2 Template
 
-```
-The files are empty placeholders only. You may adjust this template as appropriate for your project.
-Never commit large data files,trained models, personal API Keys/secrets to GitHub
-```
-
-#### Project Milestone 2 Organization
-
-```
-├── Readme.md
-├── data # DO NOT UPLOAD DATA TO GITHUB, only .gitkeep to keep the directory or a really small sample
-├── notebooks
-│   └── eda.ipynb
-├── references
-├── reports
-│   └── Statement of Work_Sample.pdf
-└── src
-    ├── datapipeline
-    │   ├── Dockerfile
-    │   ├── Pipfile
-    │   ├── Pipfile.lock
-    │   ├── dataloader.py
-    │   ├── docker-shell.sh
-    │   ├── preprocess_cv.py
-    │   ├── preprocess_rag.py
-    ├── docker-compose.yml
-    └── models
-        ├── Dockerfile
-        ├── docker-shell.sh
-        ├── infer_model.py
-        ├── model_rag.py
-        └── train_model.py
-```
 
 # AC215 - Milestone2 - MoodSync: AI-Powered Playlists for Emotional Resonance
 
+## Project Information
 **Team Members**
 Eunice Liu (youchiliu@fas.harvard.edu)
 Megan Luu (meganluu@g.harvard.edu)
@@ -43,16 +11,14 @@ Xinyu Chen (xinyuchen@hms.harvard.edu)
 **Group Name**
 MoodSync Group
 
-**Project**
+**Description**
 In this project, we aim to develop an AI-powered music recommendation tool. The tool will feature a chatbot designed to analyze text input from users about their current mood and music preferences, such as favorite artists and genres. Users can input descriptions of their feelings and musical tastes, and the chatbot will generate a personalized playlist tailored to their emotional state and preferences. It will be powered by a RAG model and fine-tuned models, making it a specialist in personalized music playlist curation.
 
-### Milestone2 ###
+**Overview of this Milestone**
 
-In this milestone, we have the components for data management, including versioning, as well as the computer vision and language models.
-
-**Data**
-We gathered a dataset of 100,000 cheese images representing approximately 1,500 different varieties. The dataset, approximately 100GB in size, was collected from the following sources: (1), (2), (3). We have stored it in a private Google Cloud Bucket.
-Additionally, we compiled 250 bibliographical sources on cheese, including books and reports, from sources such as (4) and (5).
+## Data
+1. The Genius Expertise Dataset consists of public user and song information from [genius.com](https://genius.com/), focusing on song lyrics, annotations, and artists informations. Collected through web crawls from September 2019 to January 2020, this dataset includes annotations of the lyrics from users and artists that can be valuable for building the RAG model by leveraging the insights and interpretations embedded in the annotations. The dataset was cited as follows: Lim, Derek, and Austin R. Benson. "Expertise and Dynamics within Crowdsourced Musical Knowledge Curation: A Case Study of the Genius Platform." Proceedings of the International Conference on Web and Social Media (ICWSM), 2021. The data file can be accessed [here](https://github.com/cptq/genius-expertise/tree/master/data). This dataset can significantly enhance the understanding of lyrical interpretations and user contributions, making it a useful resource for research and model development in music annotation and analysis. We stored the dataset in our private Google Cloud Platform bucket.
+2. 
 
 **Data Pipeline Containers**
 1. One container processes the 100GB dataset by resizing the images and storing them back to Google Cloud Storage (GCS).
@@ -87,5 +53,32 @@ To run Dockerfile - `Instructions here`
 **Notebooks/Reports**
 This folder contains code that is not part of container - for e.g: Application mockup, EDA, any 🔍 🕵️‍♀️ 🕵️‍♂️ crucial insights, reports or visualizations.
 
+#### Project Milestone 2 Organization
+
+```
+├── Readme.md
+├── data # DO NOT UPLOAD DATA TO GITHUB, only .gitkeep to keep the directory or a really small sample
+├── notebooks
+│   └── eda.ipynb
+├── references
+├── reports
+│   └── Statement of Work_Sample.pdf
+└── src
+    ├── datapipeline
+    │   ├── Dockerfile
+    │   ├── Pipfile
+    │   ├── Pipfile.lock
+    │   ├── dataloader.py
+    │   ├── docker-shell.sh
+    │   ├── preprocess_cv.py
+    │   ├── preprocess_rag.py
+    ├── docker-compose.yml
+    └── models
+        ├── Dockerfile
+        ├── docker-shell.sh
+        ├── infer_model.py
+        ├── model_rag.py
+        └── train_model.py
+```
 ----
 You may adjust this template as appropriate for your project.
