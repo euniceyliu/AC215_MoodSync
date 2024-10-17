@@ -35,15 +35,16 @@ RUN set -ex; \
 
 
 # Switch to the new user
+USER app
 WORKDIR /app
 
 # Install python packages
 ADD --chown=app:app Pipfile /app/ 
     ##Pipfile.lock
 
-RUN pipenv --clear
+#RUN pipenv --clear
 RUN pipenv lock --verbose
-# RUN pipenv sync if already exists
+# RUN pipenv sync #if already exists
 
 # Add the rest of the source code. This is done last so we don't invalidate all
 # layers when we change a line of code.
