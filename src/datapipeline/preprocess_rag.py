@@ -1,3 +1,4 @@
+
 import os
 import argparse
 import pandas as pd
@@ -15,16 +16,18 @@ import vertexai
 from vertexai.language_models import TextEmbeddingInput, TextEmbeddingModel
 from vertexai.generative_models import GenerativeModel, GenerationConfig, Content, Part, ToolConfig
 
+
 # Langchain
 from semantic_splitter import SemanticChunker
-
+from langchain.text_splitter import CharacterTextSplitter, RecursiveCharacterTextSplitter
 # Setup
 GCP_PROJECT = os.environ["GCP_PROJECT"]
 GCP_LOCATION = "us-central1"
 EMBEDDING_MODEL = "text-embedding-004"
 EMBEDDING_DIMENSION = 256
 GENERATIVE_MODEL = "gemini-1.5-flash-001"
-INPUT_DATA = "gs://rag_data_song/input/combined_df.csv"
+# use test dataset for now
+INPUT_DATA = "gs://rag_data_song/input/combined_df_test.csv"
 OUTPUT_FOLDER = "gs://rag_data_song/output"
 CHROMADB_HOST = "llm-rag-chromadb"
 CHROMADB_PORT = 8000
@@ -80,8 +83,9 @@ def generate_text_embeddings(chunks, dimensionality: int = 256, batch_size=250):
     return all_embeddings
 
 def load_text_embeddings(df, collection, batch_size=500):
+    """Load text embeddings into ChromaDB with preserved metadata"""
     df["id"] = df.index.astype(str)
-    hashed_titles = df["title"].apply(lambda x: hashlib.sha256(x.encode()).hexdigest()[:16])
+    hashed_titles = df["title"].apply(lambda x: hashlib.sha256(str(x).encode()).hexdigest()[:16])
     df["id"] = hashed_titles + "-" + df["id"]
 
     total_inserted = 0
@@ -90,12 +94,15 @@ def load_text_embeddings(df, collection, batch_size=500):
 
         ids = batch["id"].tolist()
         documents = batch["chunk"].tolist()
+        
+        # Use the metadata fields directly from the DataFrame
         metadatas = batch.apply(lambda row: {
-            "title": row["title"],
-            "artist": row["artist"],
-            "year": int(row["year"]),
-            "language": row["language"]
+            "title": str(row["title"]),
+            "primary_artist": str(row["primary_artist"]),
+            "release_date": str(row["release_date"]),
+            "tags": str(row["tags"])
         }, axis=1).tolist()
+        
         embeddings = batch["embedding"].tolist()
 
         collection.add(
@@ -119,21 +126,34 @@ def read():
     # Display the first few rows of the dataframe
     print(data.head())
 
-def chunk():
-    print("chunk()")
-
-    start_time = time.time()  # Start timing
+def chunk(method="semantic-split"):
+    print(f"chunk() using method: {method}")
+    start_time = time.time()
 
     df = pd.read_csv(INPUT_DATA)
     print("Number of annotations in the dataset:", len(df))
 
-    # Initialize semantic chunker with embedding function
-    text_splitter = SemanticChunker(embedding_function=generate_text_embeddings)
-    
-    all_chunks = []  # Initialize a list to store all chunks
+    chunked_data = []  # Initialize a list to store all chunks
+
+    # Initialize the appropriate text splitter based on method
+    if method == "char-split":
+        chunk_size = 350
+        chunk_overlap = 20
+        text_splitter = CharacterTextSplitter(
+            chunk_size=chunk_size, 
+            chunk_overlap=chunk_overlap, 
+            separator='', 
+            strip_whitespace=False
+        )
+    elif method == "recursive-split":
+        chunk_size = 350
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size)
+    elif method == "semantic-split":
+        text_splitter = SemanticChunker(embedding_function=generate_text_embeddings)
+    else:
+        raise ValueError(f"Unknown chunking method: {method}")
 
     for _, row in df.iterrows():
-        print(1)
         try:
             tags = ', '.join(ast.literal_eval(row['tags']))
         except (ValueError, SyntaxError):
@@ -141,66 +161,87 @@ def chunk():
             tags = ''
         
         full_text = (
-            f"Title: {row['title']}\n"
-            f"Primary Artist: {row['primary_artist']}\n"
-            f"Release Date: {row['release_date']}\n"
-            f"Tags: {tags}\n"
             f"Lyrics: {row['Lyrics']}\n"
             f"Full Lyrics: {row['lyrics_full']}\n"
             f"Annotation: {row['Annotation']}"
         )
         chunks = text_splitter.create_documents([full_text])
+        
         chunks = [doc.page_content for doc in chunks]
-        all_chunks.extend(chunks)  # Collect chunks from each iteration
+
+        # Append each chunk to the list
+        for chunk in chunks:
+            chunked_data.append({
+                "chunk": chunk,
+                "title": row['title'],
+                "primary_artist": row['primary_artist'],
+                "release_date": row['release_date'],
+                "tags": tags  # Fixed syntax error: changed "tag:" to "tags"
+            })
+
+    # Create a DataFrame from the list of dictionaries
+    chunked_df = pd.DataFrame(chunked_data)
+    print("Shape of chunked data:", chunked_df.shape)
+    print(chunked_df.head())
 
     # Create a DataFrame from all chunks
-    chunked_df = pd.DataFrame(all_chunks, columns=["chunk"])
+    # chunked_df = pd.DataFrame(all_chunks, columns=["chunk"])
     print("Shape of chunked data:", chunked_df.shape)
     print(chunked_df.head())
 
     # Write to GCS using gcsfs
     fs = gcsfs.GCSFileSystem(project=GCP_PROJECT)
+    gcs_path = os.path.join(OUTPUT_FOLDER, f"chunks-{method}-songs.jsonl")
     
-    # Construct the full GCS path
-    gcs_path = os.path.join(OUTPUT_FOLDER, "chunks-semantic-songs.jsonl")
-    
-    # Write the DataFrame to GCS as a JSONL file
     with fs.open(gcs_path, 'w') as f:
         chunked_df.to_json(f, orient='records', lines=True)
 
     print(f"Data written to {gcs_path}")
 
-    end_time = time.time()  # End timing
+    end_time = time.time()
     total_time = end_time - start_time
     print(f"The 'chunk' function took {total_time:.2f} seconds to run.")
 
-def embed():
-    print("embed()")
+def embed(method="semantic-split"):
+    print(f"embed() using method: {method}")
+    start_time = time.time()
 
-    jsonl_file = os.path.join(OUTPUT_FOLDER, "chunks-semantic-songs.jsonl")
+    jsonl_file = os.path.join(OUTPUT_FOLDER, f"chunks-{method}-songs.jsonl")
     print("Processing file:", jsonl_file)
 
     data_df = pd.read_json(jsonl_file, lines=True)
     print("Shape:", data_df.shape)
     print(data_df.head())
 
+    # Filter out empty chunks
+    data_df = data_df[data_df['chunk'].notna() & (data_df['chunk'].str.strip() != '')]
+    print(f"Shape after removing empty chunks: {data_df.shape}")
+
     chunks = data_df["chunk"].values
-    # Using smaller batch size for semantic split
-    embeddings = generate_text_embeddings(chunks, EMBEDDING_DIMENSION, batch_size=15)
+
+    # Adjust batch size based on method
+    batch_size = 15 if method == "semantic-split" else 100
+    embeddings = generate_text_embeddings(chunks, EMBEDDING_DIMENSION, batch_size=batch_size)
     data_df["embedding"] = embeddings
 
     print("Shape:", data_df.shape)
     print(data_df.head())
 
-    jsonl_filename = os.path.join(OUTPUT_FOLDER, "embeddings-semantic-songs.jsonl")
-    with open(jsonl_filename, "w") as json_file:
-        json_file.write(data_df.to_json(orient='records', lines=True))
+    fs = gcsfs.GCSFileSystem(project=GCP_PROJECT)
+    gcs_path = os.path.join(OUTPUT_FOLDER, f"embeddings-{method}-songs.jsonl")
+    
+    with fs.open(gcs_path, 'w') as f:
+        data_df.to_json(f, orient='records', lines=True)
 
-def load():
-    print("load()")
+    end_time = time.time()
+    total_time = end_time - start_time
+    print(f"The 'embed' function took {total_time:.2f} seconds to run.")
+
+def load(method="semantic-split"):
+    print(f"load() using method: {method}")
 
     client = chromadb.HttpClient(host=CHROMADB_HOST, port=CHROMADB_PORT)
-    collection_name = "semantic-song-collection"
+    collection_name = f"{method}-song-collection"
     print("Creating collection:", collection_name)
 
     try:
@@ -213,7 +254,7 @@ def load():
     print(f"Created new empty collection '{collection_name}'")
     print("Collection:", collection)
 
-    jsonl_file = os.path.join(OUTPUT_FOLDER, "embeddings-semantic-songs.jsonl")
+    jsonl_file = os.path.join(OUTPUT_FOLDER, f"embeddings-{method}-songs.jsonl")
     print("Processing file:", jsonl_file)
 
     data_df = pd.read_json(jsonl_file, lines=True)
@@ -222,16 +263,83 @@ def load():
 
     load_text_embeddings(data_df, collection)
 
+def query(method="semantic-split"):
+    print("query()")
+
+    # Connect to chroma DB
+    client = chromadb.HttpClient(host=CHROMADB_HOST, port=CHROMADB_PORT)
+
+    # Get collection
+    collection_name = f"{method}-song-collection"
+
+    query = "I need a chill playlist for studying with ambient and lo-fi beats to help me focus."
+    query_embedding = generate_query_embedding(query)
+    print("Embedding values:", query_embedding)
+
+    # Get the collection
+    collection = client.get_collection(name=collection_name)
+
+    # 1: Basic similarity search
+    print("\n1. Basic Similarity Search:")
+    print("Query:", query)
+    results = collection.query(
+        query_embeddings=[query_embedding],
+        n_results=3,
+        include=['documents', 'metadatas', 'distances']  # Include all available information
+    )
+    print_results(results)
+
+    # 2: Query with artist filter
+    print("\n2. Query with Artist Filter: Kendrick-lamar")
+    artist_results = collection.query(
+        query_embeddings=[query_embedding],
+        n_results=3,
+        where={"primary_artist": "Kendrick-lamar"},
+        include=['documents', 'metadatas', 'distances']
+    )
+    print_results(artist_results)
+
+    # 3: Query with lexical search
+    print("\n3. Query with Lexical Search: contains reminising")
+    lexical_results = collection.query(
+        query_embeddings=[query_embedding],
+        n_results=3,
+        where_document={"$contains": "reminising"},
+        include=['documents', 'metadatas', 'distances']
+    )
+    print_results(lexical_results)
+
+def print_results(results):
+    """Helper function to print query results in a formatted way"""
+    if not results or not results['ids']:
+        print("No results found")
+        return
+    
+    print(f"\nFound {len(results['ids'][0])} results:")
+    
+    for i in range(len(results['ids'][0])):
+        print(f"\nResult {i + 1}:")
+        print(f"ID: {results['ids'][0][i]}")
+        if 'documents' in results and results['documents']:
+            print(f"Document: {results['documents'][0][i][:200]}...")  # Print first 200 chars
+        if 'metadatas' in results and results['metadatas']:
+            print(f"Metadata: {results['metadatas'][0][i]}")
+        if 'distances' in results and results['distances']:
+            print(f"Distance: {results['distances'][0][i]}")
+        print("-" * 80)
+
 def main(args=None):
     print("CLI Arguments:", args)
     if args.chunk:
-        chunk()
+        chunk(method=args.chunk_type)
     if args.embed:
-        embed()
+        embed(method=args.chunk_type)
     if args.load:
-        load()
+        load(method=args.chunk_type)
     if args.read:
         read()
+    if args.query:
+        query(method=args.chunk_type)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Song Data Processing CLI")
@@ -239,5 +347,16 @@ if __name__ == "__main__":
     parser.add_argument("--chunk", action="store_true", help="Chunk text")
     parser.add_argument("--embed", action="store_true", help="Generate embeddings")
     parser.add_argument("--load", action="store_true", help="Load embeddings to vector db")
+    parser.add_argument(
+		"--query",
+		action="store_true",
+		help="Query vector db",
+	)
+    parser.add_argument(
+        "--chunk_type", 
+        default="semantic-split", 
+        choices=["char-split", "recursive-split", "semantic-split"],
+        help="Chunking method to use"
+    )
     args = parser.parse_args()
     main(args)
