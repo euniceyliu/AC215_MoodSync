@@ -6,6 +6,9 @@ import time
 import glob
 import hashlib
 import chromadb
+import ast
+import gcsfs
+import time
 
 # Vertex AI
 import vertexai
@@ -13,11 +16,7 @@ from vertexai.language_models import TextEmbeddingInput, TextEmbeddingModel
 from vertexai.generative_models import GenerativeModel, GenerationConfig, Content, Part, ToolConfig
 
 # Langchain
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-#from langchain_experimental.text_splitter import SemanticChunker
 from semantic_splitter import SemanticChunker
-import agent_tools
 
 # Setup
 GCP_PROJECT = os.environ["GCP_PROJECT"]
@@ -25,158 +24,220 @@ GCP_LOCATION = "us-central1"
 EMBEDDING_MODEL = "text-embedding-004"
 EMBEDDING_DIMENSION = 256
 GENERATIVE_MODEL = "gemini-1.5-flash-001"
-INPUT_FOLDER = "input-datasets"
-OUTPUT_FOLDER = "outputs"
+INPUT_DATA = "gs://rag_data_song/input/combined_df.csv"
+OUTPUT_FOLDER = "gs://rag_data_song/output"
 CHROMADB_HOST = "llm-rag-chromadb"
 CHROMADB_PORT = 8000
 vertexai.init(project=GCP_PROJECT, location=GCP_LOCATION)
-# https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/text-embeddings-api#python
+
 embedding_model = TextEmbeddingModel.from_pretrained(EMBEDDING_MODEL)
-# Configuration settings for the content generation
+
 generation_config = {
-    "max_output_tokens": 8192,  # Maximum number of tokens for output
-    "temperature": 0.25,  # Control randomness in output
-    "top_p": 0.95,  # Use nucleus sampling
+    "max_output_tokens": 8192,
+    "temperature": 0.25,
+    "top_p": 0.95,
 }
 
+SYSTEM_INSTRUCTION = """
+You are an AI assistant specialized in music knowledge. Your responses are based solely on the information provided in the text chunks given to you. Do not use any external knowledge or make assumptions beyond what is explicitly stated in these chunks.
+
+When answering a query:
+1. Carefully read all the text chunks provided.
+2. Identify the most relevant information from these chunks to address the user's question.
+3. Formulate your response using only the information found in the given chunks.
+4. If the provided chunks do not contain sufficient information to answer the query, state that you don't have enough information to provide a complete answer.
+5. Always maintain a professional and knowledgeable tone, befitting a music expert.
+6. If there are contradictions in the provided chunks, mention this in your response and explain the different viewpoints presented.
+
+Remember:
+- Your knowledge is limited to the information in the provided chunks.
+- Do not invent information or draw from knowledge outside of the given text chunks.
+- If asked about topics unrelated to music, politely redirect the conversation back to music-related subjects.
+- Be concise in your responses while ensuring you cover all relevant information from the chunks.
+
+Your goal is to provide accurate, helpful information about music based solely on the content of the text chunks you receive with each query.
 """
-EDITING --
-roughly speaking seems to be 
-    chunk --> embed --> load
-        for semantic splitting 
-		
-		
-**needs to be modified, more functions added, configurations details changed etc 
 
-"""
+generative_model = GenerativeModel(
+    GENERATIVE_MODEL,
+    system_instruction=[SYSTEM_INSTRUCTION]
+)
 
+def generate_query_embedding(query):
+    query_embedding_inputs = [TextEmbeddingInput(task_type='RETRIEVAL_DOCUMENT', text=query)]
+    kwargs = dict(output_dimensionality=EMBEDDING_DIMENSION) if EMBEDDING_DIMENSION else {}
+    embeddings = embedding_model.get_embeddings(query_embedding_inputs, **kwargs)
+    return embeddings[0].values
 
-def chunk(method="char-split"):
-	print("chunk()")
+def generate_text_embeddings(chunks, dimensionality: int = 256, batch_size=250):
+    all_embeddings = []
+    for i in range(0, len(chunks), batch_size):
+        batch = chunks[i:i+batch_size]
+        inputs = [TextEmbeddingInput(text, "RETRIEVAL_DOCUMENT") for text in batch]
+        kwargs = dict(output_dimensionality=dimensionality) if dimensionality else {}
+        embeddings = embedding_model.get_embeddings(inputs, **kwargs)
+        all_embeddings.extend([embedding.values for embedding in embeddings])
+    return all_embeddings
 
-	# Make dataset folders
-	os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+def load_text_embeddings(df, collection, batch_size=500):
+    df["id"] = df.index.astype(str)
+    hashed_titles = df["title"].apply(lambda x: hashlib.sha256(x.encode()).hexdigest()[:16])
+    df["id"] = hashed_titles + "-" + df["id"]
 
-	# Get the list of text file
-	text_files = glob.glob(os.path.join(INPUT_FOLDER, "books", "*.txt"))
-	print("Number of files to process:", len(text_files))
+    total_inserted = 0
+    for i in range(0, df.shape[0], batch_size):
+        batch = df.iloc[i:i+batch_size].copy().reset_index(drop=True)
 
-	# Process
-	for text_file in text_files:
-		print("Processing file:", text_file)
-		filename = os.path.basename(text_file)
-		book_name = filename.split(".")[0]
+        ids = batch["id"].tolist()
+        documents = batch["chunk"].tolist()
+        metadatas = batch.apply(lambda row: {
+            "title": row["title"],
+            "artist": row["artist"],
+            "year": int(row["year"]),
+            "language": row["language"]
+        }, axis=1).tolist()
+        embeddings = batch["embedding"].tolist()
 
-		with open(text_file) as f:
-			input_text = f.read()
-		
-		text_chunks = None
-		if method == "char-split":
-			chunk_size = 350
-			chunk_overlap = 20
-			# Init the splitter
-			text_splitter = CharacterTextSplitter(chunk_size = chunk_size, chunk_overlap=chunk_overlap, separator='', strip_whitespace=False)
+        collection.add(
+            ids=ids,
+            documents=documents,
+            metadatas=metadatas,
+            embeddings=embeddings
+        )
+        total_inserted += len(batch)
+        print(f"Inserted {total_inserted} items...")
 
-			# Perform the splitting
-			text_chunks = text_splitter.create_documents([input_text])
-			text_chunks = [doc.page_content for doc in text_chunks]
-			print("Number of chunks:", len(text_chunks))
+    print(f"Finished inserting {total_inserted} items into collection '{collection.name}'")
 
-		elif method == "recursive-split":
-			chunk_size = 350
-			# Init the splitter
-			text_splitter = RecursiveCharacterTextSplitter(chunk_size = chunk_size)
+def read():
+    # URI to your GCS bucket file
+    file_path = 'gs://rag_data_song/combined_df.csv'
 
-			# Perform the splitting
-			text_chunks = text_splitter.create_documents([input_text])
-			text_chunks = [doc.page_content for doc in text_chunks]
-			print("Number of chunks:", len(text_chunks))
-		
-		elif method == "semantic-split":
-			# Init the splitter
-			text_splitter = SemanticChunker(embedding_function=generate_text_embeddings)
-			# Perform the splitting
-			text_chunks = text_splitter.create_documents([input_text])
-			
-			text_chunks = [doc.page_content for doc in text_chunks]
-			print("Number of chunks:", len(text_chunks))
+    # Read the CSV file directly from GCS
+    data = pd.read_csv(file_path)
 
-		if text_chunks is not None:
-			# Save the chunks
-			data_df = pd.DataFrame(text_chunks,columns=["chunk"])
-			data_df["book"] = book_name
-			print("Shape:", data_df.shape)
-			print(data_df.head())
+    # Display the first few rows of the dataframe
+    print(data.head())
 
-			jsonl_filename = os.path.join(OUTPUT_FOLDER, f"chunks-{method}-{book_name}.jsonl")
-			with open(jsonl_filename, "w") as json_file:
-				json_file.write(data_df.to_json(orient='records', lines=True))
+def chunk():
+    print("chunk()")
 
+    start_time = time.time()  # Start timing
 
-def embed(method="char-split"):
-	print("embed()")
+    df = pd.read_csv(INPUT_DATA)
+    print("Number of annotations in the dataset:", len(df))
 
-	# Get the list of chunk files
-	jsonl_files = glob.glob(os.path.join(OUTPUT_FOLDER, f"chunks-{method}-*.jsonl"))
-	print("Number of files to process:", len(jsonl_files))
+    # Initialize semantic chunker with embedding function
+    text_splitter = SemanticChunker(embedding_function=generate_text_embeddings)
+    
+    all_chunks = []  # Initialize a list to store all chunks
 
-	# Process
-	for jsonl_file in jsonl_files:
-		print("Processing file:", jsonl_file)
+    for _, row in df.iterrows():
+        print(1)
+        try:
+            tags = ', '.join(ast.literal_eval(row['tags']))
+        except (ValueError, SyntaxError):
+            print(f"Warning: Unable to parse tags for {row['title']}. Using empty string.")
+            tags = ''
+        
+        full_text = (
+            f"Title: {row['title']}\n"
+            f"Primary Artist: {row['primary_artist']}\n"
+            f"Release Date: {row['release_date']}\n"
+            f"Tags: {tags}\n"
+            f"Lyrics: {row['Lyrics']}\n"
+            f"Full Lyrics: {row['lyrics_full']}\n"
+            f"Annotation: {row['Annotation']}"
+        )
+        chunks = text_splitter.create_documents([full_text])
+        chunks = [doc.page_content for doc in chunks]
+        all_chunks.extend(chunks)  # Collect chunks from each iteration
 
-		data_df = pd.read_json(jsonl_file, lines=True)
-		print("Shape:", data_df.shape)
-		print(data_df.head())
+    # Create a DataFrame from all chunks
+    chunked_df = pd.DataFrame(all_chunks, columns=["chunk"])
+    print("Shape of chunked data:", chunked_df.shape)
+    print(chunked_df.head())
 
-		chunks = data_df["chunk"].values
-		if method == "semantic-split":
-			embeddings = generate_text_embeddings(chunks,EMBEDDING_DIMENSION, batch_size=15)
-		else:
-			embeddings = generate_text_embeddings(chunks,EMBEDDING_DIMENSION, batch_size=100)
-		data_df["embedding"] = embeddings
+    # Write to GCS using gcsfs
+    fs = gcsfs.GCSFileSystem(project=GCP_PROJECT)
+    
+    # Construct the full GCS path
+    gcs_path = os.path.join(OUTPUT_FOLDER, "chunks-semantic-songs.jsonl")
+    
+    # Write the DataFrame to GCS as a JSONL file
+    with fs.open(gcs_path, 'w') as f:
+        chunked_df.to_json(f, orient='records', lines=True)
 
-		# Save 
-		print("Shape:", data_df.shape)
-		print(data_df.head())
+    print(f"Data written to {gcs_path}")
 
-		jsonl_filename = jsonl_file.replace("chunks-","embeddings-")
-		with open(jsonl_filename, "w") as json_file:
-			json_file.write(data_df.to_json(orient='records', lines=True))
+    end_time = time.time()  # End timing
+    total_time = end_time - start_time
+    print(f"The 'chunk' function took {total_time:.2f} seconds to run.")
 
+def embed():
+    print("embed()")
 
-def load(method="char-split"):
-	print("load()")
+    jsonl_file = os.path.join(OUTPUT_FOLDER, "chunks-semantic-songs.jsonl")
+    print("Processing file:", jsonl_file)
 
-	# Connect to chroma DB
-	client = chromadb.HttpClient(host=CHROMADB_HOST, port=CHROMADB_PORT)
+    data_df = pd.read_json(jsonl_file, lines=True)
+    print("Shape:", data_df.shape)
+    print(data_df.head())
 
-	# Get a collection object from an existing collection, by name. If it doesn't exist, create it.
-	collection_name = f"{method}-collection"
-	print("Creating collection:", collection_name)
+    chunks = data_df["chunk"].values
+    # Using smaller batch size for semantic split
+    embeddings = generate_text_embeddings(chunks, EMBEDDING_DIMENSION, batch_size=15)
+    data_df["embedding"] = embeddings
 
-	try:
-		# Clear out any existing items in the collection
-		client.delete_collection(name=collection_name)
-		print(f"Deleted existing collection '{collection_name}'")
-	except Exception:
-		print(f"Collection '{collection_name}' did not exist. Creating new.")
+    print("Shape:", data_df.shape)
+    print(data_df.head())
 
-	collection = client.create_collection(name=collection_name, metadata={"hnsw:space": "cosine"})
-	print(f"Created new empty collection '{collection_name}'")
-	print("Collection:", collection)
+    jsonl_filename = os.path.join(OUTPUT_FOLDER, "embeddings-semantic-songs.jsonl")
+    with open(jsonl_filename, "w") as json_file:
+        json_file.write(data_df.to_json(orient='records', lines=True))
 
-	# Get the list of embedding files
-	jsonl_files = glob.glob(os.path.join(OUTPUT_FOLDER, f"embeddings-{method}-*.jsonl"))
-	print("Number of files to process:", len(jsonl_files))
+def load():
+    print("load()")
 
-	# Process
-	for jsonl_file in jsonl_files:
-		print("Processing file:", jsonl_file)
+    client = chromadb.HttpClient(host=CHROMADB_HOST, port=CHROMADB_PORT)
+    collection_name = "semantic-song-collection"
+    print("Creating collection:", collection_name)
 
-		data_df = pd.read_json(jsonl_file, lines=True)
-		print("Shape:", data_df.shape)
-		print(data_df.head())
+    try:
+        client.delete_collection(name=collection_name)
+        print(f"Deleted existing collection '{collection_name}'")
+    except Exception:
+        print(f"Collection '{collection_name}' did not exist. Creating new.")
 
-		# Load data
-		load_text_embeddings(data_df, collection)
+    collection = client.create_collection(name=collection_name, metadata={"hnsw:space": "cosine"})
+    print(f"Created new empty collection '{collection_name}'")
+    print("Collection:", collection)
 
+    jsonl_file = os.path.join(OUTPUT_FOLDER, "embeddings-semantic-songs.jsonl")
+    print("Processing file:", jsonl_file)
+
+    data_df = pd.read_json(jsonl_file, lines=True)
+    print("Shape:", data_df.shape)
+    print(data_df.head())
+
+    load_text_embeddings(data_df, collection)
+
+def main(args=None):
+    print("CLI Arguments:", args)
+    if args.chunk:
+        chunk()
+    if args.embed:
+        embed()
+    if args.load:
+        load()
+    if args.read:
+        read()
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Song Data Processing CLI")
+    parser.add_argument("--read", action="store_true", help="Read text")
+    parser.add_argument("--chunk", action="store_true", help="Chunk text")
+    parser.add_argument("--embed", action="store_true", help="Generate embeddings")
+    parser.add_argument("--load", action="store_true", help="Load embeddings to vector db")
+    args = parser.parse_args()
+    main(args)
