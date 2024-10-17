@@ -33,16 +33,18 @@ Never commit large data files,trained models, personal API Keys/secrets to GitHu
         └── train_model.py
 ```
 
-# AC215 - Milestone2 - Cheesy App
+# AC215 - Milestone2 - MoodSync: AI-Powered Playlists for Emotional Resonance
 
 **Team Members**
-Pavlos Parmigianopapas, Pavlos Ricottapapas and Pavlos Gouda-papas
+Eunice Liu (youchiliu@fas.harvard.edu)
+Megan Luu (meganluu@g.harvard.edu)
+Xinyu Chen (xinyuchen@hms.harvard.edu)
 
 **Group Name**
-The Grate Cheese Group
+MoodSync Group
 
 **Project**
-In this project, we aim to develop an AI-powered cheese application. The app will feature visual recognition technology to identify various types of cheese and include a chatbot for answering all kinds of cheese-related questions. Users can simply take a photo of the cheese, and the app will identify it, providing detailed information. Additionally, the chatbot will allow users to ask cheese-related questions. It will be powered by a RAG model and fine-tuned models, making it a specialist in cheese expertise.
+In this project, we aim to develop an AI-powered music recommendation tool. The tool will feature a chatbot designed to analyze text input from users about their current mood and music preferences, such as favorite artists and genres. Users can input descriptions of their feelings and musical tastes, and the chatbot will generate a personalized playlist tailored to their emotional state and preferences. It will be powered by a RAG model and fine-tuned models, making it a specialist in personalized music playlist curation.
 
 ### Milestone2 ###
 
@@ -63,17 +65,14 @@ Additionally, we compiled 250 bibliographical sources on cheese, including books
 
 ## Data Pipeline Overview
 
-1. **`src/datapipeline/preprocess_cv.py`**
-   This script handles preprocessing on our 100GB dataset. It reduces the image sizes to 128x128 (a parameter that can be changed later) to enable faster iteration during processing. The preprocessed dataset is now reduced to 10GB and stored on GCS.
+1. **`src/datapipeline/preprocess_rag.py`**
+   This script prepares the necessary data for setting up our vector database. It performs chunking, embedding, and loads the data into a vector database (ChromaDB). It also include a querying function to test if our database is created successfully or not.
 
-2. **`src/datapipeline/preprocess_rag.py`**
-   This script prepares the necessary data for setting up our vector database. It performs chunking, embedding, and loads the data into a vector database (ChromaDB).
-
-3. **`src/datapipeline/Pipfile`**
+2. **`src/datapipeline/Pipfile`**
    We used the following packages to help with preprocessing:
    - `special cheese package`
 
-4. **`src/preprocessing/Dockerfile(s)`**
+3. **`src/preprocessing/Dockerfile(s)`**
    Our Dockerfiles follow standard conventions, with the exception of some specific modifications described in the Dockerfile/described below.
 
 
