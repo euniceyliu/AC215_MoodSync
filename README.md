@@ -25,17 +25,16 @@ In this project, we aim to develop an AI-powered music recommendation tool. The 
 ?
 
 **Data Pipeline Containers**
-1. One container processes the 100GB dataset by resizing the images and storing them back to Google Cloud Storage (GCS).
-
-	**Input:** Source and destination GCS locations, resizing parameters, and required secrets (provided via Docker).
-
-	**Output:** Resized images stored in the specified GCS location.
+1. One container generates Prompt-Playlist pairs based on Spotify playlist data or LLM-generated information. It then prepares the data in a JSONL format that can be used to fine-tune LLMs, and uploads the files to a specified version folder in the GCS bucket.
 
 2. Another container prepares data for the RAG model, including tasks such as chunking, embedding, and populating the vector database.
 
 **Versioned Data Strategy**
 
-src/data-versioning contains a Dockerfile with Pipfiles that installs dvc. The dvc files associated with data tracks the version changes of the prompts we have tested for finetuning. 
+For Milestone 2, we experimented with dvc and GCS bucket versioning. We ultimately decided on using GCS bucket versioning for simplicity because our datasets were relatively small and our changes to the datasets would be quite infrequent. The GCS versioning was most straightforward to integrate in our workflow because we already had a pipeline for referring to the data files in the GCS bucket when fine-tuning the LLM. However, for future milestones, we may consider implementing dvc if our dataset requires scaling. 
+
+![GCS data versioning](images/dataversioning.png)
+Here, we store V2 of our fine-tuning dataset in the GCS prompt-playlist-data bucket. This version contains the .jsonl files used to fine-tune the LLM, the raw text outputted from the LLM used to generate the data in prompt_playlist_data.txt, the finetune_df.csv file containing the prompt-playlist pairs, and the system instructions used to instruct the LLM on how to generate the data. V1 of the data can correspondingly be found in the v1 folder of the GCS prompt-playlist-data bucket. 
 
 **LLM RAG Experiments**
 1. Within the datapipeline folder, the containers built from running docker-shell.sh performes chunking, embedding, loading, query, and chatting for the dataset. 
@@ -46,12 +45,12 @@ src/data-versioning contains a Dockerfile with Pipfiles that installs dvc. The d
 
 **Application Mock-Up**
 
-![a potential UI design](UI_demo.png)
+![a potential UI design](images/UI_demo.png)
 
 ## Data Pipeline Overview
 
-1.**`src/dataset-creation/dataset-cretaion/cli.py`**
-   This script does the data gathering and uploads the collected data into the google bucket.
+1.**`src/dataset-creation/dataset-creation/cli.py`**
+   This script performs the data generation and uploads the collected data into the google bucket.
    
 2.**`src/finetune-llm/finetune-llm/cli.py`**
    This script performs the communication with the foundation models, adjusting prompting, and fine-tuning of LLM models.
@@ -102,12 +101,10 @@ To run Dockerfile - in the respective folders where the .sh scripts are located,
     ├── finetune-llm
     │   ├── env.dev
     │   ├── finetune-llm
-    │   │   ├── preprocess_rag.py
+    │   │   ├── cli.py
     │   │   ├── docker-entrypoint.sh
     │   │   ├── docker-shell.sh
     │   │   ├── Dockerfile
-    │   │   ├── docker-compose.yml
-    │   │   ├── semantic_splitter
     │   │   ├── Pipfile
     │   │   └── Pipfile.lock
     ├── datapipeline
@@ -116,8 +113,9 @@ To run Dockerfile - in the respective folders where the .sh scripts are located,
     │   ├── Dockerfile
     │   ├── Pipfile
     │   ├── Pipfile.lock
-    │   ├── promptdata.csv.dvc
-    │   └── prompts.txt.dvc
+    │   ├── semantic_splitter.py
+    │   ├── preprocess_rag.py
+    │   └── docker-compose.yml
     └── secrets
 
 ```
