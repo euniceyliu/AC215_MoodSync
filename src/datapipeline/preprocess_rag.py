@@ -58,7 +58,7 @@ Your goal is to provide accurate, helpful, and relevant playlist recommendations
 generation_config = {
     "max_output_tokens": 8192,
     "temperature": 0.01,
-    "top_p": 0.80,
+    "top_p": 0.95,
 }
 
 
