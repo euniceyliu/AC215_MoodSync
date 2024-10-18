@@ -21,6 +21,9 @@ In this project, we aim to develop an AI-powered music recommendation tool. The 
 2. The [Spotify Million Playlist](https://www.aicrowd.com/challenges/spotify-million-playlist-dataset-challenge) dataset consists of user-generated playlists with titles & descriptions. The titles and descriptions often refer to music categories (genre, artist, year, etc.), mood, themes, or occasions. Thus, we experimented with this dataset in fine-tuning to allow the LLM to better learn associations between playlist content and music categories/moods. To understand the preprocessing steps before we used the data for fine-tuning, please refer to the dataset-creation documentation.
 3. LLM-Generated Prompt-Response pairs were generated using carefully curated prompt instructions to target areas of performance improvement in the playlist recommendations. Specifically, this dataset contains example prompts that utilize modern day slang, as well as vague prompts that do not explicitly ask for playlists. This dataset was also used in fine-tuning experimentation to allow the LLM to better learn a preferred output format and persona. To understand the complete data generation and preprocessing steps for this dataset, please refer to the dataset-creation documentation.
 
+**Virtual Environment Setup**
+
+
 **Data Pipeline Containers**
 1. One container processes the 100GB dataset by resizing the images and storing them back to Google Cloud Storage (GCS).
 
@@ -29,6 +32,15 @@ In this project, we aim to develop an AI-powered music recommendation tool. The 
 	**Output:** Resized images stored in the specified GCS location.
 
 2. Another container prepares data for the RAG model, including tasks such as chunking, embedding, and populating the vector database.
+
+**Versioned Data Strategy**
+
+
+**LLM RAG Experiments**
+
+**LLM Finetuning Experiments**
+
+**Application Mock-Up**
 
 ## Data Pipeline Overview
 
