@@ -1,4 +1,3 @@
-
 import os
 import argparse
 import pandas as pd
@@ -10,6 +9,7 @@ import chromadb
 import ast
 import gcsfs
 import time
+
 
 # Vertex AI
 import vertexai
@@ -27,7 +27,7 @@ EMBEDDING_MODEL = "text-embedding-004"
 EMBEDDING_DIMENSION = 256
 GENERATIVE_MODEL = "gemini-1.5-flash-001"
 # use test dataset for now
-INPUT_DATA = "gs://rag_data_song/input/combined_df.csv"
+INPUT_DATA = "gs://rag_data_song/input/combined_df_test.csv"
 OUTPUT_FOLDER = "gs://rag_data_song/output"
 CHROMADB_HOST = "llm-rag-chromadb"
 CHROMADB_PORT = 8000
@@ -35,13 +35,36 @@ vertexai.init(project=GCP_PROJECT, location=GCP_LOCATION)
 
 embedding_model = TextEmbeddingModel.from_pretrained(EMBEDDING_MODEL)
 
+
+### good for chat
+SYSTEM_INSTRUCTION = """
+You are an AI assistant specialized in music knowledge. 
+Your goal is to recommend personalized music playlists based on the user's input. 
+Following the users' input, there will also be some chunks of data that might be a little relevant and inform you to make better recommendations.
+
+When answering a query:
+1. Carefully read all the text chunks provided.
+2. Consider the user's mood, interests, and personal music preferences to craft the perfect playlist for them
+3. Select the most appropriate song given the state of the user from their text input.
+4. Always maintain a professional and knowledgeable tone, befitting a music expert.
+
+Remember:
+- Do not invent information, or hallucinate.
+- If asked about topics unrelated to music, politely redirect the conversation back to music-related subjects.
+- Be concise in your responses while ensuring you cover all relevant information from the chunks.
+
+Your goal is to provide accurate, helpful, and relevant playlist recommendations to users.
+"""
 generation_config = {
     "max_output_tokens": 8192,
-    "temperature": 0.25,
+    "temperature": 0.01,
     "top_p": 0.95,
 }
 
-SYSTEM_INSTRUCTION = """
+
+
+### good for query 
+"""
 You are an AI assistant specialized in music knowledge. Your responses are based solely on the information provided in the text chunks given to you. Do not use any external knowledge or make assumptions beyond what is explicitly stated in these chunks.
 
 When answering a query:
@@ -60,6 +83,15 @@ Remember:
 
 Your goal is to provide accurate, helpful information about music based solely on the content of the text chunks you receive with each query.
 """
+"""
+generation_config = {
+    "max_output_tokens": 8192,
+    "temperature": 0.25,
+    "top_p": 0.95,
+}
+"""
+
+
 
 generative_model = GenerativeModel(
     GENERATIVE_MODEL,
@@ -72,38 +104,14 @@ def generate_query_embedding(query):
     embeddings = embedding_model.get_embeddings(query_embedding_inputs, **kwargs)
     return embeddings[0].values
 
-
-
 def generate_text_embeddings(chunks, dimensionality: int = 256, batch_size=250):
-    """Generate embeddings for text chunks, trimming those that exceed token limits."""
     all_embeddings = []
-    MAX_CHARS = 60000  # Approximate character limit corresponding to 20k tokens
-
     for i in range(0, len(chunks), batch_size):
         batch = chunks[i:i+batch_size]
-        
-        # Trim any chunks that are too long
-        processed_batch = [text[:MAX_CHARS] if len(text) > MAX_CHARS else text for text in batch]
-        
-        inputs = [TextEmbeddingInput(text, "RETRIEVAL_DOCUMENT") for text in processed_batch]
+        inputs = [TextEmbeddingInput(text, "RETRIEVAL_DOCUMENT") for text in batch]
         kwargs = dict(output_dimensionality=dimensionality) if dimensionality else {}
-        
-        try:
-            embeddings = embedding_model.get_embeddings(inputs, **kwargs)
-            all_embeddings.extend([embedding.values for embedding in embeddings])
-        except Exception as e:
-            print(f"Error processing batch {i}-{i+batch_size}: {str(e)}")
-            # Process one at a time if batch fails
-            for text in processed_batch:
-                try:
-                    single_input = [TextEmbeddingInput(text, "RETRIEVAL_DOCUMENT")]
-                    embedding = embedding_model.get_embeddings(single_input, **kwargs)
-                    all_embeddings.append(embedding[0].values)
-                except Exception as e:
-                    print(f"Error processing individual text: {str(e)}")
-                    # Add zeros for failed embeddings
-                    all_embeddings.append([0.0] * dimensionality)
-    
+        embeddings = embedding_model.get_embeddings(inputs, **kwargs)
+        all_embeddings.extend([embedding.values for embedding in embeddings])
     return all_embeddings
 
 def load_text_embeddings(df, collection, batch_size=500):
@@ -139,6 +147,8 @@ def load_text_embeddings(df, collection, batch_size=500):
         print(f"Inserted {total_inserted} items...")
 
     print(f"Finished inserting {total_inserted} items into collection '{collection.name}'")
+
+
 
 def read():
     # URI to your GCS bucket file
@@ -177,7 +187,7 @@ def chunk(method="semantic-split"):
     else:
         raise ValueError(f"Unknown chunking method: {method}")
 
-    for i, (_, row) in enumerate(df.iterrows()):
+    for _, row in df.iterrows():
         try:
             tags = ', '.join(ast.literal_eval(row['tags']))
         except (ValueError, SyntaxError):
@@ -185,15 +195,10 @@ def chunk(method="semantic-split"):
             tags = ''
         
         full_text = (
-            f"Title: {row['title']}\n"
-            f"Primary Artist: {row['primary_artist']}\n"
-            f"Release Date: {row['release_date']}\n"
-            f"Tags: {tags}\n"
             f"Lyrics: {row['Lyrics']}\n"
             f"Full Lyrics: {row['lyrics_full']}\n"
-            f"Annotation: {row['Annotation']}\n"
+            f"Annotation: {row['Annotation']}"
         )
-
         chunks = text_splitter.create_documents([full_text])
         
         chunks = [doc.page_content for doc in chunks]
@@ -207,10 +212,7 @@ def chunk(method="semantic-split"):
                 "release_date": row['release_date'],
                 "tags": tags  # Fixed syntax error: changed "tag:" to "tags"
             })
-        
-        if i % 1000 == 0:
-            print(f"Processed {i} rows")
-        
+
     # Create a DataFrame from the list of dictionaries
     chunked_df = pd.DataFrame(chunked_data)
     print("Shape of chunked data:", chunked_df.shape)
@@ -225,8 +227,8 @@ def chunk(method="semantic-split"):
     fs = gcsfs.GCSFileSystem(project=GCP_PROJECT)
     gcs_path = os.path.join(OUTPUT_FOLDER, f"chunks-{method}-songs.jsonl")
     
-    with fs.open(gcs_path, 'w') as f:
-        chunked_df.to_json(f, orient='records', lines=True)
+    #with fs.open(gcs_path, 'w') as f:
+    #    chunked_df.to_json(f, orient='records', lines=True)
 
     print(f"Data written to {gcs_path}")
 
@@ -304,7 +306,9 @@ def query(method="semantic-split"):
     # Get collection
     collection_name = f"{method}-song-collection"
 
-    query = "I need a chill playlist for studying with ambient and lo-fi beats to help me focus."
+    query = f"""
+    pre-game energy, something that keeps the crew lit but not too wild, we like edm
+    """
     query_embedding = generate_query_embedding(query)
     print("Embedding values:", query_embedding)
 
@@ -341,6 +345,66 @@ def query(method="semantic-split"):
     )
     print_results(lexical_results)
 
+
+
+#flatten metadata
+def extract_strings(item):
+    if isinstance(item, dict):
+        # Extract string values from the dictionary (adjust as needed)
+        return " ".join(str(v) for v in item.values())
+    elif isinstance(item, list):
+        # Recursively flatten lists and extract strings
+        return " ".join(map(extract_strings, item))
+    else:
+        # Convert non-string items to strings directly
+        return str(item)
+
+
+def chat(method="semantic-split"):
+	print("chat()")
+
+	# Connect to chroma DB
+	client = chromadb.HttpClient(host=CHROMADB_HOST, port=CHROMADB_PORT)
+	# Get a collection object from an existing collection, by name. If it doesn't exist, create it.
+	collection_name = f"{method}-song-collection"
+
+	query = f"""
+            I need a chill playlist for studying with ambient and lo-fi beats to help me focus.
+            """
+	query_embedding = generate_query_embedding(query)
+	print("Query:", query)
+	#print("Embedding values:", query_embedding)
+	# Get the collection
+	collection = client.get_collection(name=collection_name)
+
+	# Query based on embedding value 
+	results = collection.query(
+		query_embeddings=[query_embedding],
+		n_results=1
+	)
+	print("\n\nResults:", results)
+	#print(len(results["documents"][0]))
+
+    #     {"below are some related context that might help you choose better playlists:"}
+    #chr(10) is \n for f-string
+	INPUT_PROMPT = f"""
+	{query}
+	{chr(10).join(results["documents"][0])}
+    {"".join("".join(extract_strings(results["metadatas"][0])))}
+	"""
+    #    {"".join("".join(extract_strings(results["metadatas"][0])))}
+    #probably need a way to combine the different keys of the same entry from the results dict
+
+	print("INPUT_PROMPT: ",INPUT_PROMPT)
+	response = generative_model.generate_content(
+		[INPUT_PROMPT],  # Input prompt
+		generation_config=generation_config,  # Configuration settings
+		stream=False,  # Enable streaming for responses
+	)
+	generated_text = response.text
+	print("LLM Response:", generated_text)
+
+
 def print_results(results):
     """Helper function to print query results in a formatted way"""
     if not results or not results['ids']:
@@ -372,6 +436,8 @@ def main(args=None):
         read()
     if args.query:
         query(method=args.chunk_type)
+    if args.chat:
+        chat(method=args.chunk_type)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Song Data Processing CLI")
@@ -390,5 +456,10 @@ if __name__ == "__main__":
         choices=["char-split", "recursive-split", "semantic-split"],
         help="Chunking method to use"
     )
+    parser.add_argument(
+		"--chat",
+		action="store_true",
+		help="Chat with LLM",
+	)
     args = parser.parse_args()
     main(args)
