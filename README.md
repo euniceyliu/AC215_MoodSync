@@ -41,6 +41,9 @@ Below are examples of running containers for different parts of the project:
 - **Dataset Creation**:
   ![Dataset Creation Container](results/images/virtenv_dataset-creation.png)
 
+- **Fine-Tune LLM**
+  ![Finetune LLM Container](results/images/virtenv_finetune-llm.png)
+
 - **Preprocessing RAG**:
   ![Preprocessing RAG Container](results/images/virtenv_preprocess-rag.png)
 
