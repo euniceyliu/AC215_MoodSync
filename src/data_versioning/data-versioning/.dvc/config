@@ -1,4 +1,0 @@
-[core]
-    remote = prompt_playlist_data
-['remote "prompt_playlist_data"']
-    url = gs://prompt-playlist-data/dvc_store
