@@ -19,9 +19,9 @@ GCP_LOCATION = "us-central1"
 GENERATIVE_SOURCE_MODEL = "gemini-1.5-flash-002" # gemini-1.5-pro-002
 # Configuration settings for the content generation
 generation_config = {
-    "max_output_tokens": 3000,  # Maximum number of tokens for output
-    "temperature": 0.75,  # Control randomness in output
-    "top_p": 0.95,  # Use nucleus sampling
+    "max_output_tokens": 5000,  # Maximum number of tokens for output
+    "temperature": 1.85,  # Control randomness in output
+    "top_p": 0.97,  # Use nucleus sampling
 }
 
 # Safety settings to filter out harmful content
@@ -65,6 +65,26 @@ Provide the Prompt and Response pairs in the following format:
 {"prompt": "I'm feeling lost.","response": "I'm really sorry you're feeling lost right now. That can be such a tough and confusing place to be. Let me create a playlist that gives you some space to reflect, with calming, grounding tracks and a few uplifting ones that gently remind you you're not alone.\n**Holocene – Bon Iver** A hauntingly beautiful song that captures feelings of introspection and searching for meaning.\n**Lost in the Light – Bahamas** A mellow, soothing track that feels like a gentle reminder that it's okay to not have everything figured out.\n**River – Leon Bridges** A soulful and calming song about seeking peace and redemption.  I hope these tracks bring you a sense of comfort and help you navigate through the emotions you're experiencing."},
 """
 
+SYSTEM_INSTRUCTION_LLM = """Generate 15 prompt & response pairs resembling a user's interaction with an AI personalized playlist recommendation system.
+Each prompt must be 1-2 sentences and contain information about the user's emotion and/or their music preferences such as artists or genre. Ensure all the prompts are unique, each using a specific tone. Adhere to the following guidelines:
+1. Some prompts must use a variety of modern trendy slang words such as 'sauce', 'slap', 'fire', 'wavy', 'slay'. You may use these words and other slang words.
+2. Some prompts must not explicitly ask for a playlist, but rather just state the user's current context or mood, i.e. 'I have an exam tomorrow.'
+3. Some prompts must be an abstract feeling with imagery, i.e. 'I'm walking through the busy streets of a big city.' Do not copy this example
+4. Some prompts must consist of only a list of concepts that allude to a feeling, i.e. 'cocoa, pumpkins, knitting'. Do not copy this example.
+
+
+Next, assume you are the expert at recommending personalized playlists. Generate the response that adheres to the following guidelines:
+1. Acknowledge that you understand the user's mood and paraphrase what they're looking for. Use an empathetic and enthusiastic tone. 
+2. Cater to the tone of the user. For example, if they use slang, you can speak conversationally and casual. If they are sad, use a gentle and comforting tone.
+3. Select songs that are most relevant based on the user's mood and music preferences. If there is not enough information provided by the user, provide a preliminary playlist, but encourage them to share more information.
+4. Present a maximum of 15 songs in the playlist, and provide a brief explanation as to why each song is included in the playlist. The explanations should be brief but informative and unique.
+5. Conclude the response with words of encouragement, with a brief statement about how this music is a great complement to their current situation.
+
+Output Format:
+Provide the Prompt and Response pairs in the following format, but do not copy the example:
+[{"prompt": "I'm feeling lost.","response": "I'm really sorry you're feeling lost right now. That can be such a tough and confusing place to be. Let me create a playlist that gives you some space to reflect, with calming, grounding tracks and a few uplifting ones that gently remind you you're not alone.\n**Holocene – Bon Iver** A hauntingly beautiful song that captures feelings of introspection and searching for meaning.\n**Lost in the Light – Bahamas** A mellow, soothing track that feels like a gentle reminder that it's okay to not have everything figured out.\n**River – Leon Bridges** A soulful and calming song about seeking peace and redemption.  I hope these tracks bring you a sense of comfort and help you navigate through the emotions you're experiencing."}]
+"""
+
 vertexai.init(project=GCP_PROJECT, location=GCP_LOCATION)
 
 
@@ -90,6 +110,26 @@ def generate_data(file_path):
         with open(FILENAME, "a") as file:
             file.write(generated_text)
 
+def generate_data_llm():
+    generative_model = GenerativeModel(
+        GENERATIVE_SOURCE_MODEL,
+        system_instruction = [SYSTEM_INSTRUCTION_LLM]
+    )
+    INPUT_PROMPT = """Generate 15 prompt & response pairs. Ensure each pair is independent and unique."""
+    NUM_ITERATIONS = 5 # INCREASE TO CREATE A LARGE DATASET
+    for i in range(0, NUM_ITERATIONS):
+        time.sleep(2)
+        response = generative_model.generate_content(
+            [INPUT_PROMPT],  # Input prompt
+            generation_config=generation_config,  # Configuration settings
+            safety_settings=safety_settings,
+            stream=False  # Enable streaming for responses
+            )
+        generated_text = response.text
+        print('Writing data file...')
+        with open(FILENAME, "a") as file:
+            file.write(generated_text)
+
 
 def prepare():
     with open(FILENAME, "r") as read_file:
@@ -107,6 +147,24 @@ def prepare():
             json_file.write(df_test[["contents"]].to_json(orient='records', lines=True))
         with open("data_generating_prompt.txt", "w") as file:
             file.write(SYSTEM_INSTRUCTION)
+        print("All files prepared!")
+
+def prepare_llm():
+    with open(FILENAME, "r") as read_file:
+        text_response = read_file.read()
+        text_response = text_response.replace("]\n```\n```json\n[",",").replace("```json","").replace("```", "")
+        json_response = json.loads(text_response)
+        final_df = pd.DataFrame(json_response)
+        final_df.to_csv('finetune_df.csv', index=False)
+        final_df["contents"] = final_df.apply(lambda row: [{"role":"user","parts":[{"text": row["prompt"]}]},{"role":"model","parts":[{"text": row["response"]}]}], axis=1)
+        df_train, df_test = train_test_split(final_df, test_size=0.1, random_state=42)
+        with open("train.jsonl", "w") as json_file:
+            json_file.write(df_train[["contents"]].to_json(orient='records', lines=True))
+        with open("test.jsonl", "w") as json_file:
+            json_file.write(df_test[["contents"]].to_json(orient='records', lines=True))
+        with open("data_generating_prompt.txt", "w") as file:
+            file.write(SYSTEM_INSTRUCTION_LLM)
+        print("All files prepared!")
 
 
 def upload(version):
@@ -117,6 +175,7 @@ def upload(version):
     timeout = 300
 
     data_files = glob.glob("*.jsonl") + glob.glob("*.csv") + glob.glob("*.txt")
+    data_files = [file for file in data_files if "finetune_data_df_half.csv" not in file]
     data_files.sort()
     
     # Upload data
@@ -125,18 +184,27 @@ def upload(version):
         blob = bucket.blob(destination_blob_name)
         print("Uploading file:", data_file, destination_blob_name)
         blob.upload_from_filename(data_file, timeout=timeout)
+    print('All files uploaded to bucket!')
+
 
 def main(args=None):
     print("CLI Arguments:", args)
 
-    if args.prepare:
-        prepare()
-    
     if args.generate_data:
         generate_data(args.file)
 
+    if args.generate_data_llm:
+        generate_data_llm()
+
+    if args.prepare:
+        prepare()
+    
+    if args.prepare_llm:
+        prepare_llm()
+
     if args.upload:
         upload(args.version)
+
 
 
 if __name__ == "__main__":
@@ -148,6 +216,18 @@ if __name__ == "__main__":
         "--generate_data",
         action="store_true",
         help="Generate fine-tuning data",
+    )
+
+    parser.add_argument(
+        "--generate_data_llm",
+        action="store_true",
+        help="Generate fine-tuning data with an LLM",
+    )
+
+    parser.add_argument(
+        "--prepare_llm",
+        action="store_true",
+        help="Prepare LLM generated data"
     )
 
     parser.add_argument('--file', 
