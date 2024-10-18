@@ -24,6 +24,18 @@ For this milestone, we implemented and documented virtual environments for conta
 3. LLM-Generated Prompt-Response pairs were generated using carefully curated prompt instructions to target areas of performance improvement in the playlist recommendations. Specifically, this dataset contains example prompts that utilize modern day slang, as well as vague prompts that do not explicitly ask for playlists. This dataset was also used in fine-tuning experimentation to allow the LLM to better learn a preferred output format and persona. To understand the complete data generation and preprocessing steps for this dataset, please refer to the dataset-creation [documentation](src/dataset-creation).
 
 
+## Projects' Components Overview
+
+1.**`src/dataset-creation/dataset-creation/cli.py`**
+   This script performs the data generation and uploads the collected data into the google bucket.
+   
+2.**`src/finetune-llm/finetune-llm/cli.py`**
+   This script performs the communication with the foundation models, adjusting prompting, and fine-tuning of LLM models.
+   
+3.**`src/datapipeline/preprocess_rag.py`**
+   This script prepares the necessary data for setting up our vector database. It performs chunking, embedding, and loads the data into a vector database (ChromaDB). It also include a querying function to test if our database is created successfully or not.
+
+
 ## Virtual Environment Setup
 Each component of the project is uniquely containerized such that they each have their own tailored virtual environment with the packages and installations required to perform its processes. These environments were created using `pipenv` to generate `Pipfile` and `Pipfile.lock` that included the necessary packages. Then, the Dockerfile tells the system to install the packages based on the `Pipfile.lock`, ensuring that the container environment has all the dependencies needed. Finally, `docker-shell.sh` sets up variables used for GCP credentials, builds the Docker image, and runs the container. 
 
@@ -53,17 +65,6 @@ For Milestone 2, we experimented with dvc and GCS bucket versioning. We ultimate
 
 ![GCS data versioning](results/images/dataversioning.png)
 Here, we store V2 of our fine-tuning dataset in the GCS prompt-playlist-data bucket. This version contains the .jsonl files used to fine-tune the LLM, the raw text outputted from the LLM used to generate the data in prompt_playlist_data.txt, the finetune_df.csv file containing the prompt-playlist pairs, and the system instructions used to instruct the LLM on how to generate the data. V1 of the data can correspondingly be found in the v1 folder of the GCS prompt-playlist-data bucket. 
-
-## Data Pipeline Overview
-
-1.**`src/dataset-creation/dataset-creation/cli.py`**
-   This script performs the data generation and uploads the collected data into the google bucket.
-   
-2.**`src/finetune-llm/finetune-llm/cli.py`**
-   This script performs the communication with the foundation models, adjusting prompting, and fine-tuning of LLM models.
-   
-3.**`src/datapipeline/preprocess_rag.py`**
-   This script prepares the necessary data for setting up our vector database. It performs chunking, embedding, and loads the data into a vector database (ChromaDB). It also include a querying function to test if our database is created successfully or not.
 
 ## LLM Experiments
 **LLM RAG Experiments**
