@@ -34,6 +34,7 @@ In this project, we aim to develop an AI-powered music recommendation tool. The 
 2. Another container prepares data for the RAG model, including tasks such as chunking, embedding, and populating the vector database.
 
 **Versioned Data Strategy**
+
 src/data-versioning contains a Dockerfile with Pipfiles that installs dvc. The dvc files associated with data tracks the version changes of the prompts we have tested for finetuning. 
 
 **LLM RAG Experiments**
@@ -41,32 +42,32 @@ src/data-versioning contains a Dockerfile with Pipfiles that installs dvc. The d
 2. Attempts at preliminary RAG experimentation with semantic chunking, different temperatures, different prompts, and different chatting content retrieved from RAG search can be found at [this google sheets](https://docs.google.com/spreadsheets/d/1y8O647Cm27uGKXFjlYm7Tbsdz7yxjr2rYflDZmshVo4/edit?usp=sharing). 
 
 **LLM Finetuning Experiments**
-1. Within the finetune-llm folder, the container built from running docker-shell.sh performs communication with different foundation LLM models as well as fine-tuning of the models with various epochs. The preliminary experiments by adjusting different models, different epochs, and different prompts for finetuning can be found on the same [google sheet](https://docs.google.com/spreadsheets/d/1y8O647Cm27uGKXFjlYm7Tbsdz7yxjr2rYflDZmshVo4/edit?usp=sharing). 
+1. Within the finetune-llm folder, the container built from running docker-shell.sh performs communication with different foundation LLM models as well as fine-tuning of the models with various epochs. The preliminary experiments by adjusting different models, different epochs, and different prompts for finetuning can be found on the same [google sheets](https://docs.google.com/spreadsheets/d/1y8O647Cm27uGKXFjlYm7Tbsdz7yxjr2rYflDZmshVo4/edit?usp=sharing). 
 
 **Application Mock-Up**
+
 ![a potential UI design](UI_demo.png)
 
 ## Data Pipeline Overview
 
-1. **`src/datapipeline/preprocess_rag.py`**
+1.**`src/dataset-creation/dataset-cretaion/cli.py`**
+   This script does the data gathering and uploads the collected data into the google bucket.
+   
+2.**`src/finetune-llm/finetune-llm/cli.py`**
+   This script performs the communication with the foundation models, adjusting prompting, and fine-tuning of LLM models.
+   
+3.**`src/datapipeline/preprocess_rag.py`**
    This script prepares the necessary data for setting up our vector database. It performs chunking, embedding, and loads the data into a vector database (ChromaDB). It also include a querying function to test if our database is created successfully or not.
 
-2. **`src/datapipeline/Pipfile`**
-   We used the following packages to help with preprocessing:
-   - `special cheese package`
-
-3. **`src/preprocessing/Dockerfile(s)`**
-   Our Dockerfiles follow standard conventions, with the exception of some specific modifications described in the Dockerfile/described below.
-
-
 ## Running Dockerfile
+
 To run Dockerfile - in the respective folders where the .sh scripts are located, run `sh docker-shell.sh`
 
 **Model containers: src/dataset-creation, src/finetune-llm, src/datapipeline**
 - These containers have scripts for data creation, model training, and rag pipeline and inference
 
 **Notebooks/Reports**
-The reports and notebooks folder contain code that is not part of container - the reports contain the project proposal, and the notebooks contain EDA and some preliminary preprocessing of data.
+- The reports and notebooks folder contain code that is not part of container - the reports contain the project proposal, and the notebooks contain EDA and some preliminary preprocessing of data.
 
 #### Project Milestone 2 Organization
 
