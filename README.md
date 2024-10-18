@@ -25,7 +25,7 @@ In this project, we aim to develop an AI-powered music recommendation tool. The 
 ## Virtual Environment Setup
 Each component of the project is uniquely containerized such that they each have their own tailored virtual environment with the packages and installations required to perform its processes. These environments were created using `pipenv` to generate `Pipfile` and `Pipfile.lock` that included the necessary packages. Then, the Dockerfile tells the system to install the packages based on the `Pipfile.lock`, ensuring that the container environment has all the dependencies needed. Finally, `docker-shell.sh` sets up variables used for GCP credentials, builds the Docker image, and runs the container. Below is a screenshot of the running container for dataset-creation:
 
-![container screenshot](results/images/virtenvscreenshot.png)
+![container screenshot](results/images/virtenv_dataset-creation.png.png)
 
 ## Summary of Containers
 1. The container in dataset-creation generates Prompt-Playlist pairs based on Spotify playlist data or LLM-generated information. It then prepares the data in a JSONL format that can be used to fine-tune LLMs, and uploads the files to a specified version folder in the GCS bucket.
