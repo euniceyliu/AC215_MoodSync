@@ -42,19 +42,6 @@ For Milestone 2, we experimented with dvc and GCS bucket versioning. We ultimate
 ![GCS data versioning](results/images/dataversioning.png)
 Here, we store V2 of our fine-tuning dataset in the GCS prompt-playlist-data bucket. This version contains the .jsonl files used to fine-tune the LLM, the raw text outputted from the LLM used to generate the data in prompt_playlist_data.txt, the finetune_df.csv file containing the prompt-playlist pairs, and the system instructions used to instruct the LLM on how to generate the data. V1 of the data can correspondingly be found in the v1 folder of the GCS prompt-playlist-data bucket. 
 
-
-## LLM Experiments
-**LLM RAG Experiments**
-1. Within the datapipeline folder, the containers built from running docker-shell.sh performes chunking, embedding, loading, query, and chatting for the dataset. 
-2. Attempts at preliminary RAG experimentation with semantic chunking, different temperatures, different prompts, and different chatting content retrieved from RAG search can be found at [this google sheets](https://docs.google.com/spreadsheets/d/1y8O647Cm27uGKXFjlYm7Tbsdz7yxjr2rYflDZmshVo4/edit?usp=sharing). 
-
-**LLM Finetuning Experiments**
-1. Within the finetune-llm folder, the container built from running docker-shell.sh performs communication with different foundation LLM models as well as fine-tuning of the models with various epochs. The preliminary experiments by adjusting different models, different epochs, and different prompts for finetuning can be found on the same [google sheets](https://docs.google.com/spreadsheets/d/1y8O647Cm27uGKXFjlYm7Tbsdz7yxjr2rYflDZmshVo4/edit?usp=sharing). 
-
-## Application Mock-Up
-
-![a potential UI design](results/images/UI_demo.png)
-
 ## Data Pipeline Overview
 
 1.**`src/dataset-creation/dataset-creation/cli.py`**
@@ -66,6 +53,14 @@ Here, we store V2 of our fine-tuning dataset in the GCS prompt-playlist-data buc
 3.**`src/datapipeline/preprocess_rag.py`**
    This script prepares the necessary data for setting up our vector database. It performs chunking, embedding, and loads the data into a vector database (ChromaDB). It also include a querying function to test if our database is created successfully or not.
 
+## LLM Experiments
+**LLM RAG Experiments**
+1. Within the datapipeline folder, the containers built from running docker-shell.sh performes chunking, embedding, loading, query, and chatting for the dataset. 
+2. Attempts at preliminary RAG experimentation with semantic chunking, different temperatures, different prompts, and different chatting content retrieved from RAG search can be found at [this google sheets](https://docs.google.com/spreadsheets/d/1y8O647Cm27uGKXFjlYm7Tbsdz7yxjr2rYflDZmshVo4/edit?usp=sharing). 
+
+**LLM Finetuning Experiments**
+1. Within the finetune-llm folder, the container built from running docker-shell.sh performs communication with different foundation LLM models as well as fine-tuning of the models with various epochs. The preliminary experiments by adjusting different models, different epochs, and different prompts for finetuning can be found on the same [google sheets](https://docs.google.com/spreadsheets/d/1y8O647Cm27uGKXFjlYm7Tbsdz7yxjr2rYflDZmshVo4/edit?usp=sharing). 
+
 ## Running Dockerfile
 
 To run Dockerfile - in the respective folders where the .sh scripts are located, run `sh docker-shell.sh`
@@ -76,7 +71,11 @@ To run Dockerfile - in the respective folders where the .sh scripts are located,
 **Notebooks/Reports**
 - The reports and notebooks folder contain code that is not part of container - the reports contain the project proposal, and the notebooks contain EDA and some preliminary preprocessing of data.
 
-#### Project Milestone 2 Organization
+## Application Mock-Up
+
+![a potential UI design](results/images/UI_demo.png)
+
+## Directory
 
 ```
 ├── Readme.md
