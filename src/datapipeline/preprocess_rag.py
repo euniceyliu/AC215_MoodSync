@@ -193,8 +193,8 @@ def chunk(method="semantic-split"):
     fs = gcsfs.GCSFileSystem(project=GCP_PROJECT)
     gcs_path = os.path.join(OUTPUT_FOLDER, f"chunks-{method}-songs.jsonl")
     
-    with fs.open(gcs_path, 'w') as f:
-        chunked_df.to_json(f, orient='records', lines=True)
+    #with fs.open(gcs_path, 'w') as f:
+    #    chunked_df.to_json(f, orient='records', lines=True)
 
     print(f"Data written to {gcs_path}")
 
