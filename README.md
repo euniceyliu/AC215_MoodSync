@@ -25,8 +25,15 @@ In this project, we aim to develop an AI-powered music recommendation tool. The 
 ## Virtual Environment Setup
 Each component of the project is uniquely containerized such that they each have their own tailored virtual environment with the packages and installations required to perform its processes. These environments were created using `pipenv` to generate `Pipfile` and `Pipfile.lock` that included the necessary packages. Then, the Dockerfile tells the system to install the packages based on the `Pipfile.lock`, ensuring that the container environment has all the dependencies needed. Finally, `docker-shell.sh` sets up variables used for GCP credentials, builds the Docker image, and runs the container. 
 
-### Running Containers
+### Summary of Containers
+1. The container in dataset-creation generates Prompt-Playlist pairs based on Spotify playlist data or LLM-generated information. It then prepares the data in a JSONL format that can be used to fine-tune LLMs, and uploads the files to a specified version folder in the GCS bucket.
 
+2. The container in finetune-llm enables fine-tuning of the model, as well as chatting with the foundation model and fine-tuned model.
+
+3. The container in datapipeline prepares data for the RAG model, including tasks such as chunking, embedding, and populating the vector database. It also include a sample queries into the database to check if the database is created successfully.
+
+
+### Running Containers
 Below are examples of running containers for different parts of the project:
 
 - **Dataset Creation**:
@@ -34,14 +41,6 @@ Below are examples of running containers for different parts of the project:
 
 - **Preprocessing RAG**:
   ![Preprocessing RAG Container](results/images/virtenv_preprocess-rag.png)
-
-
-## Summary of Containers
-1. The container in dataset-creation generates Prompt-Playlist pairs based on Spotify playlist data or LLM-generated information. It then prepares the data in a JSONL format that can be used to fine-tune LLMs, and uploads the files to a specified version folder in the GCS bucket.
-
-2. The container in finetune-llm enables fine-tuning of the model, as well as chatting with the foundation model and fine-tuned model.
-
-3. The container in datapipeline prepares data for the RAG model, including tasks such as chunking, embedding, and populating the vector database.
 
 
 ## Versioned Data Strategy
