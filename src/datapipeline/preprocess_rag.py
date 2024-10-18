@@ -1,4 +1,3 @@
-
 import os
 import argparse
 import pandas as pd
@@ -10,6 +9,7 @@ import chromadb
 import ast
 import gcsfs
 import time
+
 
 # Vertex AI
 import vertexai
@@ -35,13 +35,36 @@ vertexai.init(project=GCP_PROJECT, location=GCP_LOCATION)
 
 embedding_model = TextEmbeddingModel.from_pretrained(EMBEDDING_MODEL)
 
+
+### good for chat
+SYSTEM_INSTRUCTION = """
+You are an AI assistant specialized in music knowledge. 
+Your goal is to recommend personalized music playlists based on the user's input. 
+Following the users' input, there will also be some chunks of data that might be a little relevant and inform you to make better recommendations.
+
+When answering a query:
+1. Carefully read all the text chunks provided.
+2. Consider the user's mood, interests, and personal music preferences to craft the perfect playlist for them
+3. Select the most appropriate song given the state of the user from their text input.
+4. Always maintain a professional and knowledgeable tone, befitting a music expert.
+
+Remember:
+- Do not invent information, or hallucinate.
+- If asked about topics unrelated to music, politely redirect the conversation back to music-related subjects.
+- Be concise in your responses while ensuring you cover all relevant information from the chunks.
+
+Your goal is to provide accurate, helpful, and relevant playlist recommendations to users.
+"""
 generation_config = {
     "max_output_tokens": 8192,
-    "temperature": 0.25,
-    "top_p": 0.95,
+    "temperature": 0.01,
+    "top_p": 0.80,
 }
 
-SYSTEM_INSTRUCTION = """
+
+
+### good for query 
+"""
 You are an AI assistant specialized in music knowledge. Your responses are based solely on the information provided in the text chunks given to you. Do not use any external knowledge or make assumptions beyond what is explicitly stated in these chunks.
 
 When answering a query:
@@ -60,6 +83,15 @@ Remember:
 
 Your goal is to provide accurate, helpful information about music based solely on the content of the text chunks you receive with each query.
 """
+"""
+generation_config = {
+    "max_output_tokens": 8192,
+    "temperature": 0.25,
+    "top_p": 0.95,
+}
+"""
+
+
 
 generative_model = GenerativeModel(
     GENERATIVE_MODEL,
@@ -115,6 +147,8 @@ def load_text_embeddings(df, collection, batch_size=500):
         print(f"Inserted {total_inserted} items...")
 
     print(f"Finished inserting {total_inserted} items into collection '{collection.name}'")
+
+
 
 def read():
     # URI to your GCS bucket file
@@ -272,7 +306,9 @@ def query(method="semantic-split"):
     # Get collection
     collection_name = f"{method}-song-collection"
 
-    query = "I need a chill playlist for studying with ambient and lo-fi beats to help me focus."
+    query = f"""
+    pre-game energy, something that keeps the crew lit but not too wild, we like edm
+    """
     query_embedding = generate_query_embedding(query)
     print("Embedding values:", query_embedding)
 
@@ -309,6 +345,66 @@ def query(method="semantic-split"):
     )
     print_results(lexical_results)
 
+
+
+#flatten metadata
+def extract_strings(item):
+    if isinstance(item, dict):
+        # Extract string values from the dictionary (adjust as needed)
+        return " ".join(str(v) for v in item.values())
+    elif isinstance(item, list):
+        # Recursively flatten lists and extract strings
+        return " ".join(map(extract_strings, item))
+    else:
+        # Convert non-string items to strings directly
+        return str(item)
+
+
+def chat(method="semantic-split"):
+	print("chat()")
+
+	# Connect to chroma DB
+	client = chromadb.HttpClient(host=CHROMADB_HOST, port=CHROMADB_PORT)
+	# Get a collection object from an existing collection, by name. If it doesn't exist, create it.
+	collection_name = f"{method}-song-collection"
+
+	query = f"""
+            I need a chill playlist for studying with ambient and lo-fi beats to help me focus.
+            """
+	query_embedding = generate_query_embedding(query)
+	print("Query:", query)
+	#print("Embedding values:", query_embedding)
+	# Get the collection
+	collection = client.get_collection(name=collection_name)
+
+	# Query based on embedding value 
+	results = collection.query(
+		query_embeddings=[query_embedding],
+		n_results=1
+	)
+	print("\n\nResults:", results)
+	#print(len(results["documents"][0]))
+
+    #     {"below are some related context that might help you choose better playlists:"}
+    #chr(10) is \n for f-string
+	INPUT_PROMPT = f"""
+	{query}
+	{chr(10).join(results["documents"][0])}
+    {"".join("".join(extract_strings(results["metadatas"][0])))}
+	"""
+    #    {"".join("".join(extract_strings(results["metadatas"][0])))}
+    #probably need a way to combine the different keys of the same entry from the results dict
+
+	print("INPUT_PROMPT: ",INPUT_PROMPT)
+	response = generative_model.generate_content(
+		[INPUT_PROMPT],  # Input prompt
+		generation_config=generation_config,  # Configuration settings
+		stream=False,  # Enable streaming for responses
+	)
+	generated_text = response.text
+	print("LLM Response:", generated_text)
+
+
 def print_results(results):
     """Helper function to print query results in a formatted way"""
     if not results or not results['ids']:
@@ -340,6 +436,8 @@ def main(args=None):
         read()
     if args.query:
         query(method=args.chunk_type)
+    if args.chat:
+        chat(method=args.chunk_type)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Song Data Processing CLI")
@@ -358,5 +456,10 @@ if __name__ == "__main__":
         choices=["char-split", "recursive-split", "semantic-split"],
         help="Chunking method to use"
     )
+    parser.add_argument(
+		"--chat",
+		action="store_true",
+		help="Chat with LLM",
+	)
     args = parser.parse_args()
     main(args)

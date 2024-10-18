@@ -1,0 +1,178 @@
+(base) xinyuchen@Lauras-MacBook-Pro-3 datapipeline % docker network create llm-rag-network
+
+Error response from daemon: network with name llm-rag-network already exists
+(base) xinyuchen@Lauras-MacBook-Pro-3 datapipeline % docker network ls
+NETWORK ID     NAME              DRIVER    SCOPE
+b32f3adda0be   bridge            bridge    local
+8e38b1e55289   host              host      local
+8c0f4ff8f0d0   llm-rag-network   bridge    local
+cb8b46875ba9   none              null      local
+(base) xinyuchen@Lauras-MacBook-Pro-3 datapipeline % docker compose up
+WARN[0000] The "GOOGLE_APPLICATION_CREDENTIALS" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "GCP_PROJECT" variable is not set. Defaulting to a blank string. 
+[+] Running 2/0
+ ✔ Container llm-rag-chromadb  Running                                     0.0s 
+ ✔ Container llm-rag-cli       Created                                     0.1s 
+Attaching to llm-rag-chromadb, llm-rag-cli
+llm-rag-cli       | Container is running!!!
+llm-rag-cli       | 
+llm-rag-cli       | Launching subshell in virtual environment...
+llm-rag-cli       | Traceback (most recent call last):
+llm-rag-cli       |   File "/usr/local/bin/pipenv", line 8, in <module>
+llm-rag-cli       |     sys.exit(cli())
+llm-rag-cli       |              ^^^^^
+llm-rag-cli       |   File "/usr/local/lib/python3.11/site-packages/pipenv/vendor/click/core.py", line 1157, in __call__
+llm-rag-cli       |     return self.main(*args, **kwargs)
+llm-rag-cli       |            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+llm-rag-cli       |   File "/usr/local/lib/python3.11/site-packages/pipenv/cli/options.py", line 52, in main
+llm-rag-cli       |     return super().main(*args, **kwargs, windows_expand_args=False)
+llm-rag-cli       |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+llm-rag-cli       |   File "/usr/local/lib/python3.11/site-packages/pipenv/vendor/click/core.py", line 1078, in main
+llm-rag-cli       |     rv = self.invoke(ctx)
+llm-rag-cli       |          ^^^^^^^^^^^^^^^^
+llm-rag-cli       |   File "/usr/local/lib/python3.11/site-packages/pipenv/vendor/click/core.py", line 1688, in invoke
+llm-rag-cli       |     return _process_result(sub_ctx.command.invoke(sub_ctx))
+llm-rag-cli       |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+llm-rag-cli       |   File "/usr/local/lib/python3.11/site-packages/pipenv/vendor/click/core.py", line 1434, in invoke
+llm-rag-cli       |     return ctx.invoke(self.callback, **ctx.params)
+llm-rag-cli       |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+llm-rag-cli       |   File "/usr/local/lib/python3.11/site-packages/pipenv/vendor/click/core.py", line 783, in invoke
+llm-rag-cli       |     return __callback(*args, **kwargs)
+llm-rag-cli       |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+llm-rag-cli       |   File "/usr/local/lib/python3.11/site-packages/pipenv/vendor/click/decorators.py", line 92, in new_func
+llm-rag-cli       |     return ctx.invoke(f, obj, *args, **kwargs)
+llm-rag-cli       |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+llm-rag-cli       |   File "/usr/local/lib/python3.11/site-packages/pipenv/vendor/click/core.py", line 783, in invoke
+llm-rag-cli       |     return __callback(*args, **kwargs)
+llm-rag-cli       |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+llm-rag-cli       |   File "/usr/local/lib/python3.11/site-packages/pipenv/cli/command.py", line 400, in shell
+llm-rag-cli       |     do_shell(
+llm-rag-cli       |   File "/usr/local/lib/python3.11/site-packages/pipenv/routines/shell.py", line 48, in do_shell
+llm-rag-cli       |     shell.fork_compat(*fork_args)
+llm-rag-cli       |   File "/usr/local/lib/python3.11/site-packages/pipenv/shells.py", line 132, in fork_compat
+llm-rag-cli       |     c.interact(escape_character=None)
+llm-rag-cli       |   File "/usr/local/lib/python3.11/site-packages/pipenv/vendor/pexpect/pty_spawn.py", line 788, in interact
+llm-rag-cli       |     mode = tty.tcgetattr(self.STDIN_FILENO)
+llm-rag-cli       |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+llm-rag-cli       | termios.error: (25, 'Inappropriate ioctl for device')
+llm-rag-cli exited with code 1
+Gracefully stopping... (press Ctrl+C again to force)
+[+] Stopping 2/2
+ ✔ Container llm-rag-cli       Stopped                                     0.0s 
+ ✔ Container llm-rag-chromadb  Stopped                                     1.2s 
+(base) xinyuchen@Lauras-MacBook-Pro-3 datapipeline % docker images
+REPOSITORY        TAG       IMAGE ID       CREATED          SIZE
+llm-rag-cli       latest    436e18fa0bec   26 minutes ago   1.48GB
+<none>            <none>    2c9c8fb2e2ed   26 minutes ago   1.48GB
+chromadb/chroma   0.5.5     51087e83073b   2 months ago     487MB
+(base) xinyuchen@Lauras-MacBook-Pro-3 datapipeline % docker network ls
+NETWORK ID     NAME              DRIVER    SCOPE
+b32f3adda0be   bridge            bridge    local
+8e38b1e55289   host              host      local
+8c0f4ff8f0d0   llm-rag-network   bridge    local
+cb8b46875ba9   none              null      local
+(base) xinyuchen@Lauras-MacBook-Pro-3 datapipeline % sh docker-shell.sh 
+[+] Building 0.9s (12/12) FINISHED                         docker:desktop-linux
+ => [internal] load build definition from Dockerfile                       0.0s
+ => => transferring dockerfile: 1.71kB                                     0.0s
+ => [internal] load metadata for docker.io/library/python:3.11-slim-bookw  0.7s
+ => [auth] library/python:pull token for registry-1.docker.io              0.0s
+ => [internal] load .dockerignore                                          0.0s
+ => => transferring context: 2B                                            0.0s
+ => [1/6] FROM docker.io/library/python:3.11-slim-bookworm@sha256:a9476aa  0.0s
+ => [internal] load build context                                          0.0s
+ => => transferring context: 19.75kB                                       0.0s
+ => CACHED [2/6] RUN set -ex;     for i in $(seq 1 8); do mkdir -p "/usr/  0.0s
+ => CACHED [3/6] WORKDIR /app                                              0.0s
+ => CACHED [4/6] ADD --chown=app:app Pipfile Pipfile.lock /app/            0.0s
+ => CACHED [5/6] RUN pipenv sync                                           0.0s
+ => [6/6] ADD --chown=app:app . /app                                       0.0s
+ => exporting to image                                                     0.0s
+ => => exporting layers                                                    0.0s
+ => => writing image sha256:ba479de1217f06ad08ffffa1aa25a9f7d9765e7ca36f5  0.0s
+ => => naming to docker.io/library/llm-rag-cli                             0.0s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/lestdmvw0vjhm8vj13jgp5ems
+
+What's next:
+    View a summary of image vulnerabilities and recommendations → docker scout quickview 
+unknown flag: --rm
+(base) xinyuchen@Lauras-MacBook-Pro-3 datapipeline % sh docker-shell.sh
+[+] Building 1.6s (11/11) FINISHED                         docker:desktop-linux
+ => [internal] load build definition from Dockerfile                       0.0s
+ => => transferring dockerfile: 1.71kB                                     0.0s
+ => [internal] load metadata for docker.io/library/python:3.11-slim-bookw  0.3s
+ => [internal] load .dockerignore                                          0.1s
+ => => transferring context: 2B                                            0.0s
+ => [1/6] FROM docker.io/library/python:3.11-slim-bookworm@sha256:a9476aa  0.0s
+ => [internal] load build context                                          0.0s
+ => => transferring context: 4.28kB                                        0.0s
+ => CACHED [2/6] RUN set -ex;     for i in $(seq 1 8); do mkdir -p "/usr/  0.0s
+ => CACHED [3/6] WORKDIR /app                                              0.0s
+ => CACHED [4/6] ADD --chown=app:app Pipfile Pipfile.lock /app/            0.0s
+ => CACHED [5/6] RUN pipenv sync                                           0.0s
+ => [6/6] ADD --chown=app:app . /app                                       1.1s
+ => exporting to image                                                     0.1s
+ => => exporting layers                                                    0.0s
+ => => writing image sha256:4b0870b8c0b0940c24d14cb5b8a02abed1454597acdd4  0.0s
+ => => naming to docker.io/library/llm-rag-cli                             0.0s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/n65ak65gpu96102b1nvwcrmhn
+
+What's next:
+    View a summary of image vulnerabilities and recommendations → docker scout quickview 
+unknown flag: --rm
+(base) xinyuchen@Lauras-MacBook-Pro-3 datapipeline % sh docker-shell.sh
+[+] Building 1.2s (11/11) FINISHED                         docker:desktop-linux
+ => [internal] load build definition from Dockerfile                       0.0s
+ => => transferring dockerfile: 1.71kB                                     0.0s
+ => [internal] load metadata for docker.io/library/python:3.11-slim-bookw  0.3s
+ => [internal] load .dockerignore                                          0.0s
+ => => transferring context: 2B                                            0.0s
+ => [1/6] FROM docker.io/library/python:3.11-slim-bookworm@sha256:a9476aa  0.0s
+ => [internal] load build context                                          0.0s
+ => => transferring context: 4.28kB                                        0.0s
+ => CACHED [2/6] RUN set -ex;     for i in $(seq 1 8); do mkdir -p "/usr/  0.0s
+ => CACHED [3/6] WORKDIR /app                                              0.0s
+ => CACHED [4/6] ADD --chown=app:app Pipfile Pipfile.lock /app/            0.0s
+ => CACHED [5/6] RUN pipenv sync                                           0.0s
+ => [6/6] ADD --chown=app:app . /app                                       0.7s
+ => exporting to image                                                     0.1s
+ => => exporting layers                                                    0.0s
+ => => writing image sha256:5d56f2e0b1c4fad9beaa25e76f99a9ea49f2ce964502b  0.0s
+ => => naming to docker.io/library/llm-rag-cli                             0.0s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/9n4yq9pin1lwgzmmw8m549jkx
+
+What's next:
+    View a summary of image vulnerabilities and recommendations → docker scout quickview 
+[+] Creating 1/0
+ ✔ Container llm-rag-chromadb  Created                                     0.0s 
+[+] Running 1/1
+ ✔ Container llm-rag-chromadb  Started                                     0.4s 
+Container is running!!!
+
+Launching subshell in virtual environment...
+app@263939cd2d57:/app$  source /home/app/.local/share/virtualenvs/app-4PlAip0Q/bin/activate
+(app) app@263939cd2d57:/app$ python preprocess_rag.py --load
+CLI Arguments: Namespace(read=False, chunk=False, embed=False, load=True, query=False, chunk_type='semantic-split')
+load() using method: semantic-split
+Creating collection: semantic-split-song-collection
+Collection 'semantic-split-song-collection' did not exist. Creating new.
+Created new empty collection 'semantic-split-song-collection'
+Collection: Collection(id=5165365f-e568-4dff-acc6-b24cf7c3b727, name=semantic-split-song-collection)
+Processing file: gs://rag_data_song/output/embeddings-semantic-split-songs.jsonl
+Shape: (30045, 6)
+                                               chunk  ...                                          embedding
+0  Title: Swimming Pools (Drank)\nPrimary Artist:...  ...  [-0.0128219444, -0.0253930204, -0.0500077456, ...
+1  All I have in life is my new appetite for fail...  ...  [0.0006997478000000001, -0.033988773800000004,...
+2  Dave, say somethin' – Dave? These bitch-ass ni...  ...  [-0.0251400881, -0.0055667972, -0.0578364544, ...
+3  Title: Swimming Pools (Drank)\nPrimary Artist:...  ...  [-0.0185167603, -0.0189695098, -0.048226930200...
+4  All I have in life is my new appetite for fail...  ...  [0.0006997478000000001, -0.033988773800000004,...
+
+[5 rows x 6 columns]
+Inserted 500 items...
+Inserted 1000 items...
+Inserted 1500 items...
+Inserted 2000 items...
+Inserted 2500 items...
