@@ -6,3 +6,4 @@
 #ignore DS store to avoid computer-specific version pull/push issues
 .DS_Store
 /src/datapipeline/docker-volumes
+src/datapipeline/docker-volumes/chromadb/chroma.sqlite3
