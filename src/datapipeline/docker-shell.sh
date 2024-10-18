@@ -22,17 +22,17 @@ docker network inspect llm-rag-network >/dev/null 2>&1 || docker network create 
 docker build -t $IMAGE_NAME -f Dockerfile .
 
 # # Run Container
-docker run --rm --name $IMAGE_NAME -ti \
--v "$BASE_DIR":/app \
--v "$SECRETS_DIR":/secrets \
--v "$PERSISTENT_DIR":/persistent \
--e GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS \
--e GCP_PROJECT=$GCP_PROJECT \
-$IMAGE_NAME
+#docker run --rm --name $IMAGE_NAME -ti \
+#-v "$BASE_DIR":/app \
+#-v "$SECRETS_DIR":/secrets \
+#-v "$PERSISTENT_DIR":/persistent \
+#-e GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS \
+#-e GCP_PROJECT=$GCP_PROJECT \
+#$IMAGE_NAME
 
 
 # Run All Containers
-#docker compose run --rm --service-ports $IMAGE_NAME
+docker compose run --rm --service-ports $IMAGE_NAME
 #docker run --rm -ti -v "$(pwd)":/app $IMAGE_NAME
 
 
@@ -42,10 +42,10 @@ $IMAGE_NAME
 # docker build -t $IMAGE_NAME -f Dockerfile .
 
 # # Run Container
-# docker run --rm --name $IMAGE_NAME -ti \
-# -v "$BASE_DIR":/app \
-# -v "$SECRETS_DIR":/secrets \
-# -v "$PERSISTENT_DIR":/persistent \
-# -e GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS \
-# -e GCP_PROJECT=$GCP_PROJECT \
-# $IMAGE_NAME
+#docker run --rm --name $IMAGE_NAME -ti \
+#-v "$BASE_DIR":/app \
+#-v "$SECRETS_DIR":/secrets \
+#-v "$PERSISTENT_DIR":/persistent \
+#-e GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS \
+#-e GCP_PROJECT=$GCP_PROJECT \
+#$IMAGE_NAME

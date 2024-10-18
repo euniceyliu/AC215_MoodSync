@@ -50,6 +50,28 @@ RUN pipenv sync
 # Add the rest of the source code. This is done last so we don't invalidate all
 # layers when we change a line of code.
 ADD --chown=app:app . /app
+ADD . /app
+
+# Create the entrypoint script directly in the Dockerfile
+#RUN echo '#!/bin/bash\n\
+#\n\
+#echo "Container is running!!!"\n\
+#\n\
+#args="$@"\n\
+#echo $args\n\
+#\n\
+#if [[ -z ${args} ]]; \n\
+#then\n\
+#    pipenv shell\n\
+#else\n\
+#    pipenv run python "$args"\n\
+#fi' > /app/docker-entrypoint.sh && \
+#    chmod +x /app/docker-entrypoint.sh
+
+#add permission
+#RUN chmod +x /app/docker-entrypoint.sh
+
 
 # Entry point
-ENTRYPOINT ["/bin/bash","./docker-entrypoint.sh"]
+ENTRYPOINT ["/bin/bash"]
+#,"/app/docker-entrypoint.sh"]
