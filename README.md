@@ -22,7 +22,9 @@ In this project, we aim to develop an AI-powered music recommendation tool. The 
 3. LLM-Generated Prompt-Response pairs were generated using carefully curated prompt instructions to target areas of performance improvement in the playlist recommendations. Specifically, this dataset contains example prompts that utilize modern day slang, as well as vague prompts that do not explicitly ask for playlists. This dataset was also used in fine-tuning experimentation to allow the LLM to better learn a preferred output format and persona. To understand the complete data generation and preprocessing steps for this dataset, please refer to the dataset-creation documentation.
 
 **Virtual Environment Setup**
-?
+Each component of the project is uniquely containerized such that they each have their own tailored virtual environment with the packages and installations required to perform its processes. These environments were created using `pipenv` to generate `Pipfile` and `Pipfile.lock` that included the necessary packages. Then, the Dockerfile tells the system to install the packages based on the `Pipfile.lock`, ensuring that the container environment has all the dependencies needed. Finally, `docker-shell.sh` sets up variables used for GCP credentials, builds the Docker image, and runs the container. Below is a screenshot of the running container for dataset-creation:
+
+![container screenshot](results/images/virtenvscreenshot.png)
 
 **Summary of Containers**
 1. The container in dataset-creation generates Prompt-Playlist pairs based on Spotify playlist data or LLM-generated information. It then prepares the data in a JSONL format that can be used to fine-tune LLMs, and uploads the files to a specified version folder in the GCS bucket.
@@ -36,7 +38,7 @@ In this project, we aim to develop an AI-powered music recommendation tool. The 
 
 For Milestone 2, we experimented with dvc and GCS bucket versioning. We ultimately decided on using GCS bucket versioning for simplicity because our datasets were relatively small and our changes to the datasets would be quite infrequent. The GCS versioning was most straightforward to integrate in our workflow because we already had a pipeline for referring to the data files in the GCS bucket when fine-tuning the LLM. However, for future milestones, we may consider implementing dvc if our dataset requires scaling. 
 
-![GCS data versioning](resultsimages/dataversioning.png)
+![GCS data versioning](results/images/dataversioning.png)
 Here, we store V2 of our fine-tuning dataset in the GCS prompt-playlist-data bucket. This version contains the .jsonl files used to fine-tune the LLM, the raw text outputted from the LLM used to generate the data in prompt_playlist_data.txt, the finetune_df.csv file containing the prompt-playlist pairs, and the system instructions used to instruct the LLM on how to generate the data. V1 of the data can correspondingly be found in the v1 folder of the GCS prompt-playlist-data bucket. 
 
 **LLM RAG Experiments**
