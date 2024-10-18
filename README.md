@@ -24,16 +24,19 @@ In this project, we aim to develop an AI-powered music recommendation tool. The 
 **Virtual Environment Setup**
 ?
 
-**Data Pipeline Containers**
-1. One container generates Prompt-Playlist pairs based on Spotify playlist data or LLM-generated information. It then prepares the data in a JSONL format that can be used to fine-tune LLMs, and uploads the files to a specified version folder in the GCS bucket.
+**Summary of Containers**
+1. The container in dataset-creation generates Prompt-Playlist pairs based on Spotify playlist data or LLM-generated information. It then prepares the data in a JSONL format that can be used to fine-tune LLMs, and uploads the files to a specified version folder in the GCS bucket.
 
-2. Another container prepares data for the RAG model, including tasks such as chunking, embedding, and populating the vector database.
+2. The container in finetune-llm enables fine-tuning of the model, as well as chatting with the foundation model and fine-tuned model.
+
+3. The container in datapipeline prepares data for the RAG model, including tasks such as chunking, embedding, and populating the vector database.
+
 
 **Versioned Data Strategy**
 
 For Milestone 2, we experimented with dvc and GCS bucket versioning. We ultimately decided on using GCS bucket versioning for simplicity because our datasets were relatively small and our changes to the datasets would be quite infrequent. The GCS versioning was most straightforward to integrate in our workflow because we already had a pipeline for referring to the data files in the GCS bucket when fine-tuning the LLM. However, for future milestones, we may consider implementing dvc if our dataset requires scaling. 
 
-![GCS data versioning](images/dataversioning.png)
+![GCS data versioning](resultsimages/dataversioning.png)
 Here, we store V2 of our fine-tuning dataset in the GCS prompt-playlist-data bucket. This version contains the .jsonl files used to fine-tune the LLM, the raw text outputted from the LLM used to generate the data in prompt_playlist_data.txt, the finetune_df.csv file containing the prompt-playlist pairs, and the system instructions used to instruct the LLM on how to generate the data. V1 of the data can correspondingly be found in the v1 folder of the GCS prompt-playlist-data bucket. 
 
 **LLM RAG Experiments**
@@ -45,7 +48,7 @@ Here, we store V2 of our fine-tuning dataset in the GCS prompt-playlist-data buc
 
 **Application Mock-Up**
 
-![a potential UI design](images/UI_demo.png)
+![a potential UI design](results/images/UI_demo.png)
 
 ## Data Pipeline Overview
 
