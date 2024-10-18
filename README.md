@@ -22,7 +22,7 @@ In this project, we aim to develop an AI-powered music recommendation tool. The 
 3. LLM-Generated Prompt-Response pairs were generated using carefully curated prompt instructions to target areas of performance improvement in the playlist recommendations. Specifically, this dataset contains example prompts that utilize modern day slang, as well as vague prompts that do not explicitly ask for playlists. This dataset was also used in fine-tuning experimentation to allow the LLM to better learn a preferred output format and persona. To understand the complete data generation and preprocessing steps for this dataset, please refer to the dataset-creation documentation.
 
 **Virtual Environment Setup**
-
+?
 
 **Data Pipeline Containers**
 1. One container processes the 100GB dataset by resizing the images and storing them back to Google Cloud Storage (GCS).
@@ -34,13 +34,17 @@ In this project, we aim to develop an AI-powered music recommendation tool. The 
 2. Another container prepares data for the RAG model, including tasks such as chunking, embedding, and populating the vector database.
 
 **Versioned Data Strategy**
-
+src/data-versioning contains a Dockerfile with Pipfiles that installs dvc. The dvc files associated with data tracks the version changes of the prompts we have tested for finetuning. 
 
 **LLM RAG Experiments**
+1. Within the datapipeline folder, the containers built from running docker-shell.sh performes chunking, embedding, loading, query, and chatting for the dataset. 
+2. Attempts at preliminary RAG experimentation with semantic chunking, different temperatures, different prompts, and different chatting content retrieved from RAG search can be found at [this google sheets](https://docs.google.com/spreadsheets/d/1y8O647Cm27uGKXFjlYm7Tbsdz7yxjr2rYflDZmshVo4/edit?usp=sharing). 
 
 **LLM Finetuning Experiments**
+1. Within the finetune-llm folder, the container built from running docker-shell.sh performs communication with different foundation LLM models as well as fine-tuning of the models with various epochs. The preliminary experiments by adjusting different models, different epochs, and different prompts for finetuning can be found on the same [google sheet](https://docs.google.com/spreadsheets/d/1y8O647Cm27uGKXFjlYm7Tbsdz7yxjr2rYflDZmshVo4/edit?usp=sharing). 
 
 **Application Mock-Up**
+![a potential UI design](UI_demo.png)
 
 ## Data Pipeline Overview
 
@@ -56,42 +60,64 @@ In this project, we aim to develop an AI-powered music recommendation tool. The 
 
 
 ## Running Dockerfile
-Instructions for running the Dockerfile can be added here.
-To run Dockerfile - `Instructions here`
+To run Dockerfile - in the respective folders where the .sh scripts are located, run `sh docker-shell.sh`
 
-**Models container**
-- This container has scripts for model training, rag pipeline and inference
-- Instructions for running the model container - `Instructions here`
+**Model containers: src/dataset-creation, src/finetune-llm, src/datapipeline**
+- These containers have scripts for data creation, model training, and rag pipeline and inference
 
 **Notebooks/Reports**
-This folder contains code that is not part of container - for e.g: Application mockup, EDA, any 🔍 🕵️‍♀️ 🕵️‍♂️ crucial insights, reports or visualizations.
+The reports and notebooks folder contain code that is not part of container - the reports contain the project proposal, and the notebooks contain EDA and some preliminary preprocessing of data.
 
 #### Project Milestone 2 Organization
 
 ```
 ├── Readme.md
+├── LICENSE
 ├── data # DO NOT UPLOAD DATA TO GITHUB, only .gitkeep to keep the directory or a really small sample
 ├── notebooks
 │   └── eda.ipynb
-├── references
+│   └── finetunedata_preprocessing.ipynb
 ├── reports
-│   └── Statement of Work_Sample.pdf
+│   └── MoodSync_Proposal.pdf
 └── src
-    ├── datapipeline
+    ├── dataset-creation
+    │   ├── env.dev
+    │   ├── dataset-creation
+    │   │   ├── cli.py
+    │   │   ├── docker-entrypoint.sh
+    │   │   ├── docker-shell.sh
+    │   │   ├── Dockerfile
+    │   │   ├── Pipfile
+    │   │   ├── Pipfile.lock
+    │   │   └── spotify_playlist_data.csv
+    ├── data-versioning
+    │   ├── docker-entrypoint.sh
+    │   ├── docker-shell.sh
     │   ├── Dockerfile
     │   ├── Pipfile
     │   ├── Pipfile.lock
-    │   ├── dataloader.py
+    │   ├── promptdata.csv.dvc
+    │   └── prompts.txt.dvc
+    ├── finetune-llm
+    │   ├── env.dev
+    │   ├── finetune-llm
+    │   │   ├── preprocess_rag.py
+    │   │   ├── docker-entrypoint.sh
+    │   │   ├── docker-shell.sh
+    │   │   ├── Dockerfile
+    │   │   ├── docker-compose.yml
+    │   │   ├── semantic_splitter
+    │   │   ├── Pipfile
+    │   │   └── Pipfile.lock
+    ├── datapipeline
+    │   ├── docker-entrypoint.sh
     │   ├── docker-shell.sh
-    │   ├── preprocess_cv.py
-    │   ├── preprocess_rag.py
-    ├── docker-compose.yml
-    └── models
-        ├── Dockerfile
-        ├── docker-shell.sh
-        ├── infer_model.py
-        ├── model_rag.py
-        └── train_model.py
+    │   ├── Dockerfile
+    │   ├── Pipfile
+    │   ├── Pipfile.lock
+    │   ├── promptdata.csv.dvc
+    │   └── prompts.txt.dvc
+    └── secrets
+
 ```
 ----
-You may adjust this template as appropriate for your project.
