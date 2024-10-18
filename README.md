@@ -34,9 +34,8 @@ Each component of the project is uniquely containerized such that they each have
 
 3. The container in datapipeline prepares data for the RAG model, including tasks such as chunking, embedding, and populating the vector database. It also include a sample queries into the database to check if the database is created successfully.
 
-
 ### Running Containers
-Below are examples of running containers for different parts of the project:
+To run Dockerfile - in the respective folders where the .sh scripts are located, run `sh docker-shell.sh` Below are examples of running containers for different parts of the project:
 
 - **Dataset Creation**:
   ![Dataset Creation Container](results/images/virtenv_dataset-creation.png)
@@ -74,14 +73,8 @@ Here, we store V2 of our fine-tuning dataset in the GCS prompt-playlist-data buc
 **LLM Finetuning Experiments**
 1. Within the finetune-llm folder, the container built from running docker-shell.sh performs communication with different foundation LLM models as well as fine-tuning of the models with various epochs. The preliminary experiments by adjusting different models, different epochs, and different prompts for finetuning can be found on the same [google sheets](https://docs.google.com/spreadsheets/d/1y8O647Cm27uGKXFjlYm7Tbsdz7yxjr2rYflDZmshVo4/edit?gid=1676036235#gid=1676036235). 
 
-## Running Dockerfile
 
-To run Dockerfile - in the respective folders where the .sh scripts are located, run `sh docker-shell.sh`
-
-**Model containers: src/dataset-creation, src/finetune-llm, src/datapipeline**
-- These containers have scripts for data creation, model training, and rag pipeline and inference
-
-**Notebooks/Reports**
+## Notebooks/Reports**
 - The reports and notebooks folder contain code that is not part of container. The 'reports' folder contains the project proposal from Milestone 1. The 'notebooks' folder contains EDA on the Genius lyrics dataset that was utilized for the RAG documents, as well as a notebook for data preprocessing of the Spotify fine-tuning data.
 
 ## Application Mock-Up
