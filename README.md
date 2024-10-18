@@ -79,7 +79,7 @@ To run Dockerfile - in the respective folders where the .sh scripts are located,
 - These containers have scripts for data creation, model training, and rag pipeline and inference
 
 **Notebooks/Reports**
-- The reports and notebooks folder contain code that is not part of container - the reports contain the project proposal, and the notebooks contain EDA and some preliminary preprocessing of data.
+- The reports and notebooks folder contain code that is not part of container. The 'reports' folder contains the project proposal from Milestone 1. The 'notebooks' folder contains EDA on the Genius lyrics dataset that was utilized for the RAG documents, as well as a notebook for data preprocessing of the Spotify fine-tuning data.
 
 ## Application Mock-Up
 
