@@ -175,7 +175,7 @@ def upload(version):
     timeout = 300
 
     data_files = glob.glob("*.jsonl") + glob.glob("*.csv") + glob.glob("*.txt")
-    data_files = [file for file in data_files if "finetune_data_df_half.csv" not in file]
+    data_files = [file for file in data_files if "spotify_playlist_data.csv" not in file]
     data_files.sort()
     
     # Upload data
