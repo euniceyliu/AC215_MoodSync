@@ -21,12 +21,13 @@ In this project, we aim to develop an AI-powered music recommendation tool. The 
 2. The [Spotify Million Playlist](https://www.aicrowd.com/challenges/spotify-million-playlist-dataset-challenge) dataset consists of user-generated playlists with titles & descriptions. The titles and descriptions often refer to music categories (genre, artist, year, etc.), mood, themes, or occasions. Thus, we experimented with this dataset in fine-tuning to allow the LLM to better learn associations between playlist content and music categories/moods. To understand the preprocessing steps before we used the data for fine-tuning, please refer to the dataset-creation documentation.
 3. LLM-Generated Prompt-Response pairs were generated using carefully curated prompt instructions to target areas of performance improvement in the playlist recommendations. Specifically, this dataset contains example prompts that utilize modern day slang, as well as vague prompts that do not explicitly ask for playlists. This dataset was also used in fine-tuning experimentation to allow the LLM to better learn a preferred output format and persona. To understand the complete data generation and preprocessing steps for this dataset, please refer to the dataset-creation documentation.
 
-**Virtual Environment Setup**
+
+## Virtual Environment Setup
 Each component of the project is uniquely containerized such that they each have their own tailored virtual environment with the packages and installations required to perform its processes. These environments were created using `pipenv` to generate `Pipfile` and `Pipfile.lock` that included the necessary packages. Then, the Dockerfile tells the system to install the packages based on the `Pipfile.lock`, ensuring that the container environment has all the dependencies needed. Finally, `docker-shell.sh` sets up variables used for GCP credentials, builds the Docker image, and runs the container. Below is a screenshot of the running container for dataset-creation:
 
 ![container screenshot](results/images/virtenvscreenshot.png)
 
-**Summary of Containers**
+## Summary of Containers
 1. The container in dataset-creation generates Prompt-Playlist pairs based on Spotify playlist data or LLM-generated information. It then prepares the data in a JSONL format that can be used to fine-tune LLMs, and uploads the files to a specified version folder in the GCS bucket.
 
 2. The container in finetune-llm enables fine-tuning of the model, as well as chatting with the foundation model and fine-tuned model.
@@ -34,13 +35,15 @@ Each component of the project is uniquely containerized such that they each have
 3. The container in datapipeline prepares data for the RAG model, including tasks such as chunking, embedding, and populating the vector database.
 
 
-**Versioned Data Strategy**
+## Versioned Data Strategy
 
 For Milestone 2, we experimented with dvc and GCS bucket versioning. We ultimately decided on using GCS bucket versioning for simplicity because our datasets were relatively small and our changes to the datasets would be quite infrequent. The GCS versioning was most straightforward to integrate in our workflow because we already had a pipeline for referring to the data files in the GCS bucket when fine-tuning the LLM. However, for future milestones, we may consider implementing dvc if our dataset requires scaling. 
 
 ![GCS data versioning](results/images/dataversioning.png)
 Here, we store V2 of our fine-tuning dataset in the GCS prompt-playlist-data bucket. This version contains the .jsonl files used to fine-tune the LLM, the raw text outputted from the LLM used to generate the data in prompt_playlist_data.txt, the finetune_df.csv file containing the prompt-playlist pairs, and the system instructions used to instruct the LLM on how to generate the data. V1 of the data can correspondingly be found in the v1 folder of the GCS prompt-playlist-data bucket. 
 
+
+## LLM Experiments
 **LLM RAG Experiments**
 1. Within the datapipeline folder, the containers built from running docker-shell.sh performes chunking, embedding, loading, query, and chatting for the dataset. 
 2. Attempts at preliminary RAG experimentation with semantic chunking, different temperatures, different prompts, and different chatting content retrieved from RAG search can be found at [this google sheets](https://docs.google.com/spreadsheets/d/1y8O647Cm27uGKXFjlYm7Tbsdz7yxjr2rYflDZmshVo4/edit?usp=sharing). 
@@ -48,7 +51,7 @@ Here, we store V2 of our fine-tuning dataset in the GCS prompt-playlist-data buc
 **LLM Finetuning Experiments**
 1. Within the finetune-llm folder, the container built from running docker-shell.sh performs communication with different foundation LLM models as well as fine-tuning of the models with various epochs. The preliminary experiments by adjusting different models, different epochs, and different prompts for finetuning can be found on the same [google sheets](https://docs.google.com/spreadsheets/d/1y8O647Cm27uGKXFjlYm7Tbsdz7yxjr2rYflDZmshVo4/edit?usp=sharing). 
 
-**Application Mock-Up**
+## Application Mock-Up
 
 ![a potential UI design](results/images/UI_demo.png)
 
@@ -78,7 +81,9 @@ To run Dockerfile - in the respective folders where the .sh scripts are located,
 ```
 ├── Readme.md
 ├── LICENSE
-├── data # DO NOT UPLOAD DATA TO GITHUB, only .gitkeep to keep the directory or a really small sample
+├── results
+│   └── experiments
+│   └── images
 ├── notebooks
 │   └── eda.ipynb
 │   └── finetunedata_preprocessing.ipynb
