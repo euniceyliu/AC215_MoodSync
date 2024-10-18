@@ -17,8 +17,6 @@ vertexai = "*"
 langchain = "*"
 agent_tools = "*"
 user-agent = "*"
-gcsfs = "*"
-langchain-community = "*"
 
 [requires]
 python_version = "3.11"

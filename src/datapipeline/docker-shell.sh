@@ -10,16 +10,18 @@ export SECRETS_DIR=$(pwd)/../secrets/
 export GCP_PROJECT="ac215-project-438523" # CHANGE TO YOUR PROJECT ID
 export GOOGLE_APPLICATION_CREDENTIALS="/secrets/llm-service-account.json"
 export IMAGE_NAME="llm-rag-cli"
-export GCS_BUCKET_NAME="rag_data_song" 
+#export GCS_BUCKET_NAME="rag_data_song" 
 #export GCS_BUCKET_NAME="prompt-playlist-data"
-export GCP_ZONE="us-central1-a"
+#export GCP_ZONE="us-central1-a"
 
 
 # Create the network if we don't have it yet
 docker network inspect llm-rag-network >/dev/null 2>&1 || docker network create llm-rag-network
 
 # Build the image based on the Dockerfile
-docker build -t $IMAGE_NAME -f Dockerfile .
+#docker build -t $IMAGE_NAME -f Dockerfile .
+docker build --no-cache -t $IMAGE_NAME -f Dockerfile .
+
 
 # # Run Container
 #docker run --rm --name $IMAGE_NAME -ti \
@@ -32,8 +34,8 @@ docker build -t $IMAGE_NAME -f Dockerfile .
 
 
 # Run All Containers
-docker compose run --rm --service-ports $IMAGE_NAME
-#docker run --rm -ti -v "$(pwd)":/app $IMAGE_NAME
+#docker compose run --rm --service-ports $IMAGE_NAME
+docker run --rm -ti -v "$(pwd)":/app $IMAGE_NAME
 
 
 
