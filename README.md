@@ -24,7 +24,7 @@ For this milestone, we implemented and documented virtual environments for conta
 3. LLM-Generated Prompt-Response pairs were generated using carefully curated prompt instructions to target areas of performance improvement in the playlist recommendations. Specifically, this dataset contains example prompts that utilize modern day slang, as well as vague prompts that do not explicitly ask for playlists. This dataset was also used in fine-tuning experimentation to allow the LLM to better learn a preferred output format and persona. To understand the complete data generation and preprocessing steps for this dataset, please refer to the dataset-creation [documentation](src/dataset-creation).
 
 
-## Projects' Components Overview
+## Project's Components Overview
 
 1.**`src/dataset-creation/dataset-creation/cli.py`**
    This script performs the data generation and uploads the collected data into the google bucket.
