@@ -41,37 +41,38 @@ generation_config = {
     "top_p": 0.95,
 }
 
-SYSTEM_INSTRUCTION = """
-You are an AI assistant specialized in music knowledge. Your responses are based solely on the information provided in the text chunks given to you. Do not use any external knowledge or make assumptions beyond what is explicitly stated in these chunks.
+# comment this out since it is not part of preprocessing
 
-When answering a query:
-1. Carefully read all the text chunks provided.
-2. Identify the most relevant information from these chunks to address the user's question.
-3. Formulate your response using only the information found in the given chunks.
-4. If the provided chunks do not contain sufficient information to answer the query, state that you don't have enough information to provide a complete answer.
-5. Always maintain a professional and knowledgeable tone, befitting a music expert.
-6. If there are contradictions in the provided chunks, mention this in your response and explain the different viewpoints presented.
+# SYSTEM_INSTRUCTION = """
+# You are an AI assistant specialized in music knowledge. Your responses are based solely on the information provided in the text chunks given to you. Do not use any external knowledge or make assumptions beyond what is explicitly stated in these chunks.
 
-Remember:
-- Your knowledge is limited to the information in the provided chunks.
-- Do not invent information or draw from knowledge outside of the given text chunks.
-- If asked about topics unrelated to music, politely redirect the conversation back to music-related subjects.
-- Be concise in your responses while ensuring you cover all relevant information from the chunks.
+# When answering a query:
+# 1. Carefully read all the text chunks provided.
+# 2. Identify the most relevant information from these chunks to address the user's question.
+# 3. Formulate your response using only the information found in the given chunks.
+# 4. If the provided chunks do not contain sufficient information to answer the query, state that you don't have enough information to provide a complete answer.
+# 5. Always maintain a professional and knowledgeable tone, befitting a music expert.
+# 6. If there are contradictions in the provided chunks, mention this in your response and explain the different viewpoints presented.
 
-Your goal is to provide accurate, helpful information about music based solely on the content of the text chunks you receive with each query.
-"""
+# Remember:
+# - Your knowledge is limited to the information in the provided chunks.
+# - Do not invent information or draw from knowledge outside of the given text chunks.
+# - If asked about topics unrelated to music, politely redirect the conversation back to music-related subjects.
+# - Be concise in your responses while ensuring you cover all relevant information from the chunks.
 
-generative_model = GenerativeModel(
-    GENERATIVE_MODEL,
-    system_instruction=[SYSTEM_INSTRUCTION]
-)
+# Your goal is to provide accurate, helpful information about music based solely on the content of the text chunks you receive with each query.
+# """
+
+# generative_model = GenerativeModel(
+#     GENERATIVE_MODEL,
+#     system_instruction=[SYSTEM_INSTRUCTION]
+# )
 
 def generate_query_embedding(query):
     query_embedding_inputs = [TextEmbeddingInput(task_type='RETRIEVAL_DOCUMENT', text=query)]
     kwargs = dict(output_dimensionality=EMBEDDING_DIMENSION) if EMBEDDING_DIMENSION else {}
     embeddings = embedding_model.get_embeddings(query_embedding_inputs, **kwargs)
     return embeddings[0].values
-
 
 
 def generate_text_embeddings(chunks, dimensionality: int = 256, batch_size=250):
