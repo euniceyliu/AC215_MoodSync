@@ -34,6 +34,16 @@ Provide the Prompt and Response pairs in the following format:
 {"prompt": "I'm feeling lost.","response": "I'm really sorry you're feeling lost right now. That can be such a tough and confusing place to be. Let me create a playlist that gives you some space to reflect, with calming, grounding tracks and a few uplifting ones that gently remind you you're not alone.\n**Holocene – Bon Iver** A hauntingly beautiful song that captures feelings of introspection and searching for meaning.\n**Lost in the Light – Bahamas** A mellow, soothing track that feels like a gentle reminder that it's okay to not have everything figured out.\n**River – Leon Bridges** A soulful and calming song about seeking peace and redemption.  I hope these tracks bring you a sense of comfort and help you navigate through the emotions you're experiencing."},
 """
 ```
+
+This code was also used to generate the input prompt, assuming `row` is a row in the Spotify playlist dataset:
+
+```python
+songs = row['songs']
+title = row['title']
+description = row['description']
+query = f"Playlist Title: {title}, Description: {description}, Songs: {songs}"
+```
+
 These are sample prompt and response pairs from running this process:
 | Prompt | Response |
 |----------|----------|
