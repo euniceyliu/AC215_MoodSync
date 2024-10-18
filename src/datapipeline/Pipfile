@@ -6,19 +6,16 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
+user-agent = "*"
+requests = "*"
 google-cloud-storage = "*"
 google-generativeai = "*"
 google-cloud-aiplatform = "*"
-llama-index = "*"
 pandas = "*"
-argparse = "*"
-chromadb = "*"
-vertexai = "*"
 langchain = "*"
-agent_tools = "*"
-user-agent = "*"
-gcsfs = "*"
+llama-index = "*"
+chromadb = "*"
 langchain-community = "*"
 
 [requires]
-python_version = "3.11"
+python_version = "3.12"

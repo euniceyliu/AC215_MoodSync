@@ -1,5 +1,5 @@
 # Use the official Debian-hosted Python image
-FROM python:3.11-slim-bookworm
+FROM python:3.12-slim-bookworm
 
 ARG DEBIAN_PACKAGES="build-essential git screen vim"
 
@@ -26,7 +26,8 @@ RUN set -ex; \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     pip install --no-cache-dir --upgrade pip && \
-    pip install --upgrade pipenv && \
+    pip install pipenv && \
+    pip install gcsfs && \
     useradd -ms /bin/bash app -d /home/app -u 1000 -p "$(openssl passwd -1 Passw0rd)" && \
     mkdir -p /app && \
     mkdir -p /persistent && \
@@ -39,13 +40,9 @@ USER app
 WORKDIR /app
 
 # Install python packages
-ADD --chown=app:app Pipfile Pipfile.lock /app/ 
-    ##Pipfile.lock
+ADD --chown=app:app Pipfile Pipfile.lock /app/
 
-#RUN pipenv --clear
-#RUN pipenv lock --verbose #for more specific info on piplock
 RUN pipenv sync
-# RUN pipenv sync #if already exists
 
 # Add the rest of the source code. This is done last so we don't invalidate all
 # layers when we change a line of code.

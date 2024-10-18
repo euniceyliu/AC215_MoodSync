@@ -27,7 +27,7 @@ EMBEDDING_MODEL = "text-embedding-004"
 EMBEDDING_DIMENSION = 256
 GENERATIVE_MODEL = "gemini-1.5-flash-001"
 # use test dataset for now
-INPUT_DATA = "gs://rag_data_song/input/combined_df_test.csv"
+INPUT_DATA = "gs://rag_data_song/input/combined_df.csv"
 OUTPUT_FOLDER = "gs://rag_data_song/output"
 CHROMADB_HOST = "llm-rag-chromadb"
 CHROMADB_PORT = 8000
@@ -72,14 +72,38 @@ def generate_query_embedding(query):
     embeddings = embedding_model.get_embeddings(query_embedding_inputs, **kwargs)
     return embeddings[0].values
 
+
+
 def generate_text_embeddings(chunks, dimensionality: int = 256, batch_size=250):
+    """Generate embeddings for text chunks, trimming those that exceed token limits."""
     all_embeddings = []
+    MAX_CHARS = 60000  # Approximate character limit corresponding to 20k tokens
+
     for i in range(0, len(chunks), batch_size):
         batch = chunks[i:i+batch_size]
-        inputs = [TextEmbeddingInput(text, "RETRIEVAL_DOCUMENT") for text in batch]
+        
+        # Trim any chunks that are too long
+        processed_batch = [text[:MAX_CHARS] if len(text) > MAX_CHARS else text for text in batch]
+        
+        inputs = [TextEmbeddingInput(text, "RETRIEVAL_DOCUMENT") for text in processed_batch]
         kwargs = dict(output_dimensionality=dimensionality) if dimensionality else {}
-        embeddings = embedding_model.get_embeddings(inputs, **kwargs)
-        all_embeddings.extend([embedding.values for embedding in embeddings])
+        
+        try:
+            embeddings = embedding_model.get_embeddings(inputs, **kwargs)
+            all_embeddings.extend([embedding.values for embedding in embeddings])
+        except Exception as e:
+            print(f"Error processing batch {i}-{i+batch_size}: {str(e)}")
+            # Process one at a time if batch fails
+            for text in processed_batch:
+                try:
+                    single_input = [TextEmbeddingInput(text, "RETRIEVAL_DOCUMENT")]
+                    embedding = embedding_model.get_embeddings(single_input, **kwargs)
+                    all_embeddings.append(embedding[0].values)
+                except Exception as e:
+                    print(f"Error processing individual text: {str(e)}")
+                    # Add zeros for failed embeddings
+                    all_embeddings.append([0.0] * dimensionality)
+    
     return all_embeddings
 
 def load_text_embeddings(df, collection, batch_size=500):
@@ -153,7 +177,7 @@ def chunk(method="semantic-split"):
     else:
         raise ValueError(f"Unknown chunking method: {method}")
 
-    for _, row in df.iterrows():
+    for i, (_, row) in enumerate(df.iterrows()):
         try:
             tags = ', '.join(ast.literal_eval(row['tags']))
         except (ValueError, SyntaxError):
@@ -161,10 +185,15 @@ def chunk(method="semantic-split"):
             tags = ''
         
         full_text = (
+            f"Title: {row['title']}\n"
+            f"Primary Artist: {row['primary_artist']}\n"
+            f"Release Date: {row['release_date']}\n"
+            f"Tags: {tags}\n"
             f"Lyrics: {row['Lyrics']}\n"
             f"Full Lyrics: {row['lyrics_full']}\n"
-            f"Annotation: {row['Annotation']}"
+            f"Annotation: {row['Annotation']}\n"
         )
+
         chunks = text_splitter.create_documents([full_text])
         
         chunks = [doc.page_content for doc in chunks]
@@ -178,7 +207,10 @@ def chunk(method="semantic-split"):
                 "release_date": row['release_date'],
                 "tags": tags  # Fixed syntax error: changed "tag:" to "tags"
             })
-
+        
+        if i % 1000 == 0:
+            print(f"Processed {i} rows")
+        
     # Create a DataFrame from the list of dictionaries
     chunked_df = pd.DataFrame(chunked_data)
     print("Shape of chunked data:", chunked_df.shape)
