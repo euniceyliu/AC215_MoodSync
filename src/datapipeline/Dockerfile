@@ -39,11 +39,12 @@ USER app
 WORKDIR /app
 
 # Install python packages
-ADD --chown=app:app Pipfile /app/ 
+ADD --chown=app:app Pipfile Pipfile.lock /app/ 
     ##Pipfile.lock
 
 #RUN pipenv --clear
-RUN pipenv lock --verbose
+#RUN pipenv lock --verbose #for more specific info on piplock
+RUN pipenv sync
 # RUN pipenv sync #if already exists
 
 # Add the rest of the source code. This is done last so we don't invalidate all
