@@ -6,3 +6,4 @@
 .DS_Store
 /src/datapipeline/docker-volumes/chromadb
 src/datapipeline/docker-volumes/chromadb/chroma.sqlite3
+/src/llm-rag/docker-volumes
