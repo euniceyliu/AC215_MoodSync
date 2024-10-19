@@ -2,7 +2,7 @@
 
 ## Run Docker
 1. First run `sh docker-shell.sh` to build the containers.
-2. Then, run `docker compose up` to ensure the connection between the chromadb container and the llm-rag container over the llm-rag-network network. Use ctrl+c to exit.
+2. Then, `exit` out of the running container, run `docker compose up` to ensure the connection between the chromadb container and the llm-rag container over the llm-rag-network network. Use ctrl+c to exit.
 3. Run `sh docker-shell.sh` again, and now the docker should be running two containers.
 
 ## Run Container and llm-rag
