@@ -35,7 +35,9 @@ For this milestone, we implemented and documented virtual environments for conta
 3.**`src/datapipeline/preprocess_rag.py`**
    This script prepares the necessary data for setting up our vector database. It performs chunking, embedding, and loads the data into a vector database (ChromaDB). It also include a querying function to test if our database is created successfully or not.
 
-
+4.**`src/llm-rag/llm_rag.py`**
+   This script currently loads the preprocessed data into chromadb, and then generate response using the user's query, most relevant entry from a RAG search in the chromadb container, and a pre-set prompt from a foundation LLM model. 
+   
 ## Virtual Environment Setup
 Each component of the project is uniquely containerized such that they each have their own tailored virtual environment with the packages and installations required to perform its processes. These environments were created using `pipenv` to generate `Pipfile` and `Pipfile.lock` that included the necessary packages. Then, the Dockerfile tells the system to install the packages based on the `Pipfile.lock`, ensuring that the container environment has all the dependencies needed. Finally, `docker-shell.sh` sets up variables used for GCP credentials, builds the Docker image, and runs the container. 
 
@@ -131,6 +133,15 @@ Here, we store V2 of our fine-tuning dataset in the GCS prompt-playlist-data buc
     │   ├── Pipfile.lock
     │   ├── semantic_splitter.py
     │   ├── preprocess_rag.py
+    │   └── docker-compose.yml
+    ├── llm-rag
+    │   ├── docker-entrypoint.sh
+    │   ├── docker-shell.sh
+    │   ├── Dockerfile
+    │   ├── Pipfile
+    │   ├── Pipfile.lock
+    │   ├── semantic_splitter.py
+    │   ├── llm_rag.py
     │   └── docker-compose.yml
     └── secrets
 
