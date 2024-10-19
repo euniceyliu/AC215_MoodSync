@@ -75,10 +75,10 @@ Here, we store V2 of our fine-tuning dataset in the GCS prompt-playlist-data buc
 **LLM RAG Experiments**
 1. Within the datapipeline folder, the containers built from running docker-shell.sh performes chunking, embedding, loading, query for the dataset. Specific instructions can be found within the folder.
 2. Within the llm-rag folder, the containers built from running docker-shell.sh performs loading and chatting with the LLM+RAG model. Specific instructions can be found within the folder.
-3. Attempts at preliminary RAG experimentation with semantic chunking, different temperatures, different prompts, and different chatting content retrieved from RAG search can be found at [this google sheets](https://docs.google.com/spreadsheets/d/1y8O647Cm27uGKXFjlYm7Tbsdz7yxjr2rYflDZmshVo4/edit?gid=1856295283#gid=1856295283). 
+3. Attempts at preliminary RAG experimentation with semantic chunking, different temperatures, different prompts, and different chatting content retrieved from RAG search can be found at [this google sheets](https://docs.google.com/spreadsheets/d/1y8O647Cm27uGKXFjlYm7Tbsdz7yxjr2rYflDZmshVo4/edit?gid=1856295283#gid=1856295283). For a summary of the experiments, please see [experiment documentation](results/experiments).
 
 **LLM Finetuning Experiments**
-1. Within the finetune-llm folder, the container built from running docker-shell.sh performs communication with different foundation LLM models as well as fine-tuning of the models with various epochs. The preliminary experiments by adjusting different models, different epochs, and different prompts for finetuning can be found on the same [google sheets](https://docs.google.com/spreadsheets/d/1y8O647Cm27uGKXFjlYm7Tbsdz7yxjr2rYflDZmshVo4/edit?gid=1676036235#gid=1676036235). For a detailed explanation of the experiments, please see [experiment documentation](results/experiments)
+1. Within the finetune-llm folder, the container built from running docker-shell.sh performs communication with different foundation LLM models as well as fine-tuning of the models with various epochs. The preliminary experiments by adjusting different models, different epochs, and different prompts for finetuning can be found on the same [google sheets](https://docs.google.com/spreadsheets/d/1y8O647Cm27uGKXFjlYm7Tbsdz7yxjr2rYflDZmshVo4/edit?gid=1676036235#gid=1676036235). For a detailed explanation of the experiments, please see [experiment documentation](results/experiments).
 
 
 ## Notebooks/Reports
