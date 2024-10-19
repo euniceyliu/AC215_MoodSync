@@ -48,6 +48,9 @@ Each component of the project is uniquely containerized such that they each have
 
 3. The container in datapipeline prepares data for the RAG model, including tasks such as chunking, embedding, and populating the vector database. It also include a sample queries into the database to check if the database is created successfully.
 
+4. The container in llm-rag prepares loads the data from collection and tested out the chat() function and interacting with the LLM agent.
+
+
 ### Running Containers
 To run Dockerfile - in the respective folders where the .sh scripts are located, run `sh docker-shell.sh` Below are examples of running containers for different parts of the project:
 
