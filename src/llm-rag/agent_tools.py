@@ -397,7 +397,6 @@ get_chunk_by_artist_func = FunctionDeclaration(
  'Young-thug',
  'Ralo',
  'Yungblud-and-halsey',
- nan,
  'Kold',
  'Lorde',
  'Broods',
