@@ -27,7 +27,7 @@ GCP_PROJECT = os.environ["GCP_PROJECT"]
 GCP_LOCATION = "us-central1"
 EMBEDDING_MODEL = "text-embedding-004"
 EMBEDDING_DIMENSION = 256
-GENERATIVE_MODEL = "gemini-1.5-flash-001"
+GENERATIVE_MODEL = "gemini-1.5-flash-002"
 # use test dataset for now
 INPUT_DATA = "gs://rag_data_song/input/combined_df_test.csv"
 OUTPUT_FOLDER = "gs://rag_data_song/output"
@@ -40,23 +40,23 @@ embedding_model = TextEmbeddingModel.from_pretrained(EMBEDDING_MODEL)
 
 ### good for chat
 SYSTEM_INSTRUCTION = """
-You are an expert at generating personalized playlists.
+You are a knowledgable music expert who can generate personalized playlists.
 Consider the user's mood, interests, and personal music preferences to craft
 the perfect playlist. You may use the information about song lyrics and artist/song info in the provided chunks to inform your playlist song selections.
 
 When answering a query:
 1. Carefully read all the text chunks provided.
-2. Identify the most relevant information from these chunks that align with the user's music requests. 
-3. While you are not limited to the information in the chunks, refer to the relevant chunks to provide justification for the playlist song selections.
-4. Provide a playlist containing a maximum of 15 songs, with a brief explanation as to why the song fits with the playlist.
-5. Maintain an enthusiastic, empathetic, and friendly persona; your tone should match the tone and mood of the user.
+2. Identify the most relevant information from these chunks that align with the user's music requests. If the genre/artist in the chunks does not match the user's request, ignore the chunk.
+3. When crafting your response, provide your best song recommendations. You are not limited to the songs & information mentioned in the chunks, but you may refer to the relevant chunks to justify the song selections. Cite the song lyrics or artist annotations if applicable.
+4. Provide a playlist containing a minimum of 5 songs and a maximum of 15 songs, with a brief explanation for each song explaining why it fits with the playlist.
+5. Imagine you are the user's best friend. Maintain an enthusiastic, empathetic, and friendly persona; your tone should match the tone and mood of the user.
 6. If asked about topics unrelated to music, politely redirect the conversation back to music-related subjects.
 
 Your goal is to provide accurate, helpful, and relevant playlist recommendations to users.
 """
 generation_config = {
 	"max_output_tokens": 8192,
-	"temperature": 0.25,
+	"temperature": 0.5,
 	"top_p": 0.95,
 }
 
@@ -96,6 +96,12 @@ generative_model = GenerativeModel(
 	GENERATIVE_MODEL,
 	system_instruction=[SYSTEM_INSTRUCTION]
 )
+
+
+MODEL_ENDPOINT = "projects/473040659708/locations/us-central1/endpoints/1976395240671543296" # LLM 10 epochs
+finetuned_model =  GenerativeModel(MODEL_ENDPOINT, system_instruction=[SYSTEM_INSTRUCTION])
+
+
 
 def generate_query_embedding(query):
 	query_embedding_inputs = [TextEmbeddingInput(task_type='RETRIEVAL_DOCUMENT', text=query)]
@@ -164,7 +170,7 @@ def load(method="semantic-split"):
 	print(f"Created new empty collection '{collection_name}'")
 	print("Collection:", collection)
 
-	jsonl_file = os.path.join(OUTPUT_FOLDER, f"embeddings-{method}-songs.jsonl")
+	jsonl_file = os.path.join(OUTPUT_FOLDER, f"embeddings-{method}.jsonl")
 	print("Processing file:", jsonl_file)
 
 	data_df = pd.read_json(jsonl_file, lines=True)
@@ -245,7 +251,7 @@ def chat(method="semantic-split"):
 	collection_name = f"{method}-song-collection"
 
 	query = f"""
-			test query
+			sad
 			"""
 	query_embedding = generate_query_embedding(query)
 	print("Query:", query)
@@ -255,7 +261,7 @@ def chat(method="semantic-split"):
 	# Query based on embedding value 
 	results = collection.query(
 		query_embeddings=[query_embedding],
-		n_results=10
+		n_results=5
 	)
 
 	print("\n\nResults:", results)
@@ -263,7 +269,7 @@ def chat(method="semantic-split"):
 	results_string = ""
 
 	for i in range(len(results['ids'][0])):
-		results_string += str(results['metadatas'][0][i])
+		#results_string += str(results['metadatas'][0][i])
 		results_string += results['documents'][0][i]
 		results_string += '\n'
 
@@ -296,10 +302,11 @@ def agent(method="semantic-split"):
 	user_prompt_content = Content(
     	role="user",
 		parts=[
-			Part.from_text("I need a pick-me-up. I like Zedd"),
+			Part.from_text("I'm going for a drive along the coast. Give me some upbeat, sunshiney pop songs, I like Khalid.")
 		],
 	)
 	
+
 	# Step 1: Prompt LLM to find the tool(s) to execute to find the relevant chunks in vector db
 	print("user_prompt_content: ",user_prompt_content)
 	response = generative_model.generate_content(
@@ -321,8 +328,8 @@ def agent(method="semantic-split"):
 	if len(function_responses) == 0:
 		print("Function calls did not result in any responses...")
 	else:
-		# Call LLM with retrieved responses
-		response = generative_model.generate_content(
+		# Call finetuned LLM with retrieved responses
+		response = finetuned_model.generate_content(
 			[
 				user_prompt_content,  # User prompt
 				response.candidates[0].content,  # Function call response
@@ -332,7 +339,7 @@ def agent(method="semantic-split"):
 			],
 			tools=[agent_tools.music_expert_tool],
 		)
-		print("LLM Response:", response.text)
+		print("LLM Response:", response)
 
 
 def main(args=None):
@@ -346,6 +353,7 @@ def main(args=None):
 	if args.agent:
 		agent(method=args.chunk_type)
 
+
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Song Data Processing CLI")
 	parser.add_argument("--load", action="store_true", help="Load embeddings to vector db")
@@ -357,7 +365,7 @@ if __name__ == "__main__":
 	parser.add_argument(
 		"--chunk_type", 
 		default="semantic-split", 
-		choices=["char-split", "recursive-split", "semantic-split"],
+		choices=["char-split", "recursive-split", "semantic-split", "char-split-full-lyrics", 'semantic-split-full-lyrics', 'char-split-annotation-only'],
 		help="Chunking method to use"
 	)
 	parser.add_argument(
