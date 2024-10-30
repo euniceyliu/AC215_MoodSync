@@ -14,7 +14,7 @@ MoodSync Group
 **Description**
 In this project, we aim to develop an AI-powered music recommendation tool. The tool will feature a chatbot designed to analyze text input from users about their current mood and music preferences, such as favorite artists and genres. Users can input descriptions of their feelings and musical tastes, and the chatbot will generate a personalized playlist tailored to their emotional state and preferences. It will be powered by a RAG model and fine-tuned models, making it a specialist in personalized music playlist curation.
 
-<span style="color:red">Our midterm presentation is in the midterm_presentation folder.</span>
+<span style="color:red">Our midterm presentation is in the reports folder.</span>
 
 
 ----
@@ -22,16 +22,12 @@ In this project, we aim to develop an AI-powered music recommendation tool. The 
 ### Milestone 3 ###
 
 **Overview of this Milestone**
-For this milestone, we implemented and documented virtual environments for containerized components by docker containers for each project component (e.g., data scraping, preprocessing). We also experimented a data versioning strategy using tools like DVC. Besides, we set up a RAG (Retrieval-Augmented Generation) workflow including data collection, chunking, and vector database integration and fine-tuned models and document the process. Lastly, we developed and refined a prototype of the final application.
-
+For this milestone, we created the slides and presented a midterm presentation in business pitch style to the class. In addition, we further improved the llm-rag pipeline, enabling more efficient searching through the chunks by searching terms and/or artist name and/or tag from user input, through modification to the llm_rag.py script and the additional helper script agent_tools.py.
 
 ## Data
 1. The Genius Expertise Dataset consists of public user and song information from [genius.com](https://genius.com/), focusing on song lyrics, annotations, and artists informations. Collected through web crawls from September 2019 to January 2020, this dataset includes annotations of the lyrics from users and artists that can be valuable for building the RAG model by leveraging the insights and interpretations embedded in the annotations. The dataset was cited as follows: Lim, Derek, and Austin R. Benson. "Expertise and Dynamics within Crowdsourced Musical Knowledge Curation: A Case Study of the Genius Platform." Proceedings of the International Conference on Web and Social Media (ICWSM), 2021. The data file can be accessed [here](https://github.com/cptq/genius-expertise/tree/master/data). We obtained the lyrics, annotations, and song informations data, which can significantly enhance the understanding of lyrical interpretations and user contributions, making it a useful resource for research and model development in music annotation and analysis. We stored the dataset in our private Google Cloud Platform bucket. We applied the different load function in the github to load respective lyrics, annotations and song data.
 2. The [Spotify Million Playlist](https://www.aicrowd.com/challenges/spotify-million-playlist-dataset-challenge) dataset consists of user-generated playlists with titles & descriptions. The titles and descriptions often refer to music categories (genre, artist, year, etc.), mood, themes, or occasions. Thus, we experimented with this dataset in fine-tuning to allow the LLM to better learn associations between playlist content and music categories/moods. To understand the preprocessing steps before we used the data for fine-tuning, please refer to the dataset-creation [documentation](src/dataset-creation).
 3. LLM-Generated Prompt-Response pairs were generated using carefully curated prompt instructions to target areas of performance improvement in the playlist recommendations. Specifically, this dataset contains example prompts that utilize modern day slang, as well as vague prompts that do not explicitly ask for playlists. This dataset was also used in fine-tuning experimentation to allow the LLM to better learn a preferred output format and persona. To understand the complete data generation and preprocessing steps for this dataset, please refer to the dataset-creation [documentation](src/dataset-creation).
-
-```FILL IN DETAILS ..... In this milestone we also added additional preprocessing steps to the data, for better results later on with the fine tuned model.```
-
 
 ## Project's Components Overview
 
@@ -46,7 +42,9 @@ For this milestone, we implemented and documented virtual environments for conta
 
 4.**`src/llm-rag/llm_rag.py`**
    This script currently loads the preprocessed data into chromadb, and then generate response using the user's query, most relevant entry from a RAG search in the chromadb container, and a pre-set prompt from a foundation LLM model. 
-   
+
+```In this milestone we also added additional features to the llm-rag pipeline, enabling more efficient searching through the chunks by searching terms and/or artist name and/or tag from user input, through modification to the llm_rag.py script and the addition of the agent_tools.py script.```
+
 ## Virtual Environment Setup
 Each component of the project is uniquely containerized such that they each have their own tailored virtual environment with the packages and installations required to perform its processes. These environments were created using `pipenv` to generate `Pipfile` and `Pipfile.lock` that included the necessary packages. Then, the Dockerfile tells the system to install the packages based on the `Pipfile.lock`, ensuring that the container environment has all the dependencies needed. Finally, `docker-shell.sh` sets up variables used for GCP credentials, builds the Docker image, and runs the container. 
 
@@ -90,8 +88,6 @@ Here, we store V2 of our fine-tuning dataset in the GCS prompt-playlist-data buc
 1. Within the finetune-llm folder, the container built from running docker-shell.sh performs communication with different foundation LLM models as well as fine-tuning of the models with various epochs. The preliminary experiments by adjusting different models, different epochs, and different prompts for finetuning can be found on the same [google sheets](https://docs.google.com/spreadsheets/d/1y8O647Cm27uGKXFjlYm7Tbsdz7yxjr2rYflDZmshVo4/edit?gid=1676036235#gid=1676036235). For a detailed explanation of the experiments, please see [experiment documentation](results/experiments).
 
 
-```FILL IN DETAILS.....We worked on improving our model outputs - Details here```
-
 **Midterm Presentation**
 
 Filename: MoodSyncMidterm.pdf
@@ -117,6 +113,7 @@ Filename: MoodSyncMidterm.pdf
 │   └── finetunedata_preprocessing.ipynb
 ├── reports
 │   └── MoodSync_Proposal.pdf
+│   └── midterm_presentation.pdf
 └── src
     ├── dataset-creation
     │   ├── env.dev
@@ -162,6 +159,7 @@ Filename: MoodSyncMidterm.pdf
     │   ├── Pipfile.lock
     │   ├── semantic_splitter.py
     │   ├── llm_rag.py
+    │   ├── agent_tools.py
     │   └── docker-compose.yml
     └── secrets
 
