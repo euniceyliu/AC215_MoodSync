@@ -1,0 +1,4 @@
+[core]
+    remote = output
+['remote "output"']
+    url = gs://rag_data_song/dvc_store

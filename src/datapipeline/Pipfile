@@ -17,6 +17,8 @@ llama-index = "*"
 chromadb = "*"
 langchain-community = "*"
 gcsfs = "*"
+dvc = "*"
+dvc-gs = "*"
 
 [requires]
 python_version = "3.12"

@@ -19,6 +19,8 @@ agent_tools = "*"
 user-agent = "*"
 gcsfs = "*"
 langchain-community = "*"
+dvc = "*"
+dvc-gs = "*"
 
 [requires]
 python_version = "3.11"
