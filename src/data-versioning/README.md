@@ -8,42 +8,42 @@
 5. Make sure you have dvc and dvc_gs installed in your local environment (pip install dvc dvc_gs)
 6. Run the container (sh docker-shell.sh)
 7. Inside the container:
-  ```
-  #initialize dvc
-  dvc init
-  #add remote registry to GCS bucket
-  dvc remote add -d {folder_name} gs://{your-bucket-name}/dvc_store
-  #add the dataset to registry 
-  dvc add {folder_name}
-  #push to remote registry
-  dvc push
-  ```
+	  ```
+	  #initialize dvc
+	  dvc init
+	  #add remote registry to GCS bucket
+	  dvc remote add -d {folder_name} gs://{your-bucket-name}/dvc_store
+	  #add the dataset to registry 
+	  dvc add {folder_name}
+	  #push to remote registry
+	  dvc push
+	  ```
 8. Exit out of the container, the:
-  ```
-  git status
-  	git add .
-  	git commit -m ‘some message…’
-  	git tag -a ‘{versionTag}’ -m ‘tag dataset’
-  	git push —atomic origin {gitBranch, e.g.HEAD:main} {versionTag}
-  ```
+	```
+	git status
+	git add .
+	git commit -m ‘some message…’
+	git tag -a ‘{versionTag}’ -m ‘tag dataset’
+	git push —atomic origin {gitBranch, e.g.HEAD:main} {versionTag}
+	```
 
 ### **Updating DVC (if already implemented)**
 1. Run the container (sh docker-shell.sh)
 2. Inside the container:
-  ```
-  #add the dataset to registry
-  dvc add {folder_name}
+	```
+	#add the dataset to registry
+	dvc add {folder_name}
 	#push to remote registry
 	Dvc push 
-  ```
+	```
 3. Exit out of the container, the:
-  ```
-  git status
-  	git add .
-  	git commit -m ‘some message…’
-  	git tag -a ‘{versionTag}’ -m ‘tag dataset’
-  	git push —atomic origin {gitBranch, e.g.HEAD:main} {versionTag}
-  ```
+	```
+	git status
+	git add .
+	git commit -m ‘some message…’
+	git tag -a ‘{versionTag}’ -m ‘tag dataset’
+	git push —atomic origin {gitBranch, e.g.HEAD:main} {versionTag}
+	```
 4. Lastly use goole colab to view the content of each version:
 ```
   import os
