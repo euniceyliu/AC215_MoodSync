@@ -4,7 +4,16 @@
 1. Configure GCP service accounts on https://console.cloud.google.com/storage/browser and add secrets to your local folder.
 2. Create folders inside google cloud buckets: ```dvc_store``` and any folders to contain data you wish to track
 3. Change docker-entrypoint.sh and docker-shell.sh accordingly to reflect the folders and buckets.
-4. Make sure the github repository has .git files in it, indicating it to be a git repo.
+4. git setup
+	```
+	git init
+	git remote add origin git@github.com:YOUR_GITHUB_USERNAME/AC215_MoodSync.git
+	Git fetch origin
+ 	# view all branches 
+	Git branch -a
+ 	# establish a remote branch locally 
+	Git checkout -b milestone3 origin/milestone3
+	```
 5. Make sure you have dvc and dvc_gs installed in your local environment (pip install dvc dvc_gs)
 6. Run the container (sh docker-shell.sh)
 7. Inside the container:
@@ -46,6 +55,7 @@
 	```
 4. Lastly use goole colab to view the content of each version:
 ```
+  !pip install dvc dvc-gs
   import os
   import cv2
   import numpy as np
@@ -60,8 +70,8 @@
   
   pat = {your_github_token}
   githubUsername = {fill_in_yourUsernane}
-  !dvc list -R https://{pat}@github.com/{githubUsername}/AC215_MoodSync
   !rm -rf {folder_name}
   !dvc get https://{pat}@github.com/{githubUsername}/AC215_MoodSync {folder_name} --force --rev {versionTag}
+  !dvc list -R https://{pat}@github.com/{githubUsername}/AC215_MoodSync --rev {versionTag}
   print("Number of items:”,len(os.listdir(“{folder_name}”)))
 ```
