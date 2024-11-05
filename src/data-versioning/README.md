@@ -59,8 +59,9 @@
   auth.authenticate_user()
   
   pat = {your_github_token}
-  !dvc list -R https://{pat}@github.com/Singyuna/AC215_MoodSync
+  githubUsername = {fill_in_yourUsernane}
+  !dvc list -R https://{pat}@github.com/{githubUsername}/AC215_MoodSync
   !rm -rf {folder_name}
-  !dvc get https://{pat}@github.com/singyuna/AC215_MoodSync {folder_name} --force --rev {versionTag}
+  !dvc get https://{pat}@github.com/{githubUsername}/AC215_MoodSync {folder_name} --force --rev {versionTag}
   print("Number of items:”,len(os.listdir(“{folder_name}”)))
 ```
