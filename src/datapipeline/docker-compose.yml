@@ -6,12 +6,19 @@ services:
     llm-rag-cli:
         image: llm-rag-cli
         container_name: llm-rag-cli
+        privileged: true  # Enable privileged mode for gcs fuse
+        cap_add:
+            - SYS_ADMIN      # Add SYS_ADMIN capability
+        devices:
+            - /dev/fuse     # Allow access to /dev/fuse
         volumes:
             - ../secrets:/secrets
             - ../datapipeline:/app
         environment:
             GOOGLE_APPLICATION_CREDENTIALS: $GOOGLE_APPLICATION_CREDENTIALS
+            GOOGLE_APPLICATION_CREDENTIALS_data: $GOOGLE_APPLICATION_CREDENTIALS_data
             GCP_PROJECT: $GCP_PROJECT
+            GCS_BUKCET_NAME: $GCS_BUCKET_NAME $IMAGE_NAME
         depends_on:
             - chromadb
     chromadb:
