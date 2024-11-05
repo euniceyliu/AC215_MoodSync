@@ -18,7 +18,7 @@
 	  #push to remote registry
 	  dvc push
 	  ```
-8. Exit out of the container, the:
+8. Exit out of the container, then:
 	```
 	git status
 	git add .
