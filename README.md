@@ -37,18 +37,18 @@ For this milestone, we implemented and documented virtual environments for conta
 
 1.**`src/dataset-creation/dataset-creation/cli.py`**
    This script performs the data generation and uploads the collected data into the google bucket.
-   
+
 2.**`src/finetune-llm/finetune-llm/cli.py`**
    This script performs the communication with the foundation models, adjusting prompting, and fine-tuning of LLM models.
-   
+
 3.**`src/datapipeline/preprocess_rag.py`**
    This script prepares the necessary data for setting up our vector database. It performs chunking, embedding, and loads the data into a vector database (ChromaDB). It also include a querying function to test if our database is created successfully or not.
 
 4.**`src/llm-rag/llm_rag.py`**
-   This script currently loads the preprocessed data into chromadb, and then generate response using the user's query, most relevant entry from a RAG search in the chromadb container, and a pre-set prompt from a foundation LLM model. 
-   
+   This script currently loads the preprocessed data into chromadb, and then generate response using the user's query, most relevant entry from a RAG search in the chromadb container, and a pre-set prompt from a foundation LLM model.
+
 ## Virtual Environment Setup
-Each component of the project is uniquely containerized such that they each have their own tailored virtual environment with the packages and installations required to perform its processes. These environments were created using `pipenv` to generate `Pipfile` and `Pipfile.lock` that included the necessary packages. Then, the Dockerfile tells the system to install the packages based on the `Pipfile.lock`, ensuring that the container environment has all the dependencies needed. Finally, `docker-shell.sh` sets up variables used for GCP credentials, builds the Docker image, and runs the container. 
+Each component of the project is uniquely containerized such that they each have their own tailored virtual environment with the packages and installations required to perform its processes. These environments were created using `pipenv` to generate `Pipfile` and `Pipfile.lock` that included the necessary packages. Then, the Dockerfile tells the system to install the packages based on the `Pipfile.lock`, ensuring that the container environment has all the dependencies needed. Finally, `docker-shell.sh` sets up variables used for GCP credentials, builds the Docker image, and runs the container.
 
 ### Summary of Containers
 1. The container in dataset-creation generates Prompt-Playlist pairs based on Spotify playlist data or LLM-generated information. It then prepares the data in a JSONL format that can be used to fine-tune LLMs, and uploads the files to a specified version folder in the GCS bucket.
@@ -75,10 +75,10 @@ To run Dockerfile - in the respective folders where the .sh scripts are located,
 
 ## Versioned Data Strategy
 
-For Milestone 2, we experimented with dvc and GCS bucket versioning. We ultimately decided on using GCS bucket versioning for simplicity because our datasets were relatively small and our changes to the datasets would be quite infrequent. The GCS versioning was most straightforward to integrate in our workflow because we already had a pipeline for referring to the data files in the GCS bucket when fine-tuning the LLM. However, for future milestones, we may consider implementing dvc if our dataset requires scaling. 
+For Milestone 2, we experimented with dvc and GCS bucket versioning. We ultimately decided on using GCS bucket versioning for simplicity because our datasets were relatively small and our changes to the datasets would be quite infrequent. The GCS versioning was most straightforward to integrate in our workflow because we already had a pipeline for referring to the data files in the GCS bucket when fine-tuning the LLM. However, for future milestones, we may consider implementing dvc if our dataset requires scaling.
 
 ![GCS data versioning](results/images/dataversioning.png)
-Here, we store V2 of our fine-tuning dataset in the GCS prompt-playlist-data bucket. This version contains the .jsonl files used to fine-tune the LLM, the raw text outputted from the LLM used to generate the data in prompt_playlist_data.txt, the finetune_df.csv file containing the prompt-playlist pairs, and the system instructions used to instruct the LLM on how to generate the data. V1 of the data can correspondingly be found in the v1 folder of the GCS prompt-playlist-data bucket. 
+Here, we store V2 of our fine-tuning dataset in the GCS prompt-playlist-data bucket. This version contains the .jsonl files used to fine-tune the LLM, the raw text outputted from the LLM used to generate the data in prompt_playlist_data.txt, the finetune_df.csv file containing the prompt-playlist pairs, and the system instructions used to instruct the LLM on how to generate the data. V1 of the data can correspondingly be found in the v1 folder of the GCS prompt-playlist-data bucket.
 
 ## LLM Experiments
 **LLM RAG Experiments**

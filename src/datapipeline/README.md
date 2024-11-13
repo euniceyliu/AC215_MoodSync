@@ -36,4 +36,4 @@ python preprocess_rag.py --query --chunk_type char-split
 python preprocess_rag.py --query --chunk_type recursive-split
 python preprocess_rag.py --query --chunk_type semantic-split
 ```
-We further test whether our created collection is sucessful by querying it. This will generate an embedding for a sample query and perform similarity searches in the vector database. Besides, we can also query specific text in the collection. 
+We further test whether our created collection is sucessful by querying it. This will generate an embedding for a sample query and perform similarity searches in the vector database. Besides, we can also query specific text in the collection.

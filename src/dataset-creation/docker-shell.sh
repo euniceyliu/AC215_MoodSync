@@ -12,7 +12,7 @@ export GOOGLE_APPLICATION_CREDENTIALS="/secrets/llm-service-account.json"
 
 
 
-export IMAGE_NAME="finetune-llm"
+export IMAGE_NAME="dataset-creation"
 
 # Build the image based on the Dockerfile
 docker build -t $IMAGE_NAME -f Dockerfile .

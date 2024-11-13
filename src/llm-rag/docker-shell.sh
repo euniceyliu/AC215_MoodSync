@@ -10,7 +10,7 @@ export SECRETS_DIR=$(pwd)/../secrets/
 export GCP_PROJECT="ac215-project-438523" # CHANGE TO YOUR PROJECT ID
 export GOOGLE_APPLICATION_CREDENTIALS="/secrets/llm-service-account.json"
 export IMAGE_NAME="llm-rag-cli"
-export GCS_BUCKET_NAME="rag_data_song" 
+export GCS_BUCKET_NAME="rag_data_song"
 #export GCS_BUCKET_NAME="prompt-playlist-data"
 export GCP_ZONE="us-central1-a"
 

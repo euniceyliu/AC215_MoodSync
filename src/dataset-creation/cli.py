@@ -10,7 +10,7 @@ import vertexai
 from vertexai.generative_models import GenerativeModel, SafetySetting
 
 # Setup
-GCP_PROJECT = os.environ["GCP_PROJECT"]
+GCP_PROJECT = "ac215-project-438523"
 GCS_BUCKET_NAME = "prompt-playlist-data"
 GCP_LOCATION = "us-central1"
 GENERATIVE_SOURCE_MODEL = "gemini-1.5-flash-002"  # gemini-1.5-pro-002

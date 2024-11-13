@@ -1,5 +1,5 @@
 # Use the official Debian-hosted Python image
-FROM python:3.11-slim-bookworm
+FROM python:3.9-slim-buster
 
 ARG DEBIAN_PACKAGES="build-essential git screen vim"
 
@@ -12,6 +12,8 @@ ENV LANG=C.UTF-8
 # Tell pipenv where the shell is. This allows us to use "pipenv shell" as a
 # container entry point.
 ENV PYENV_SHELL=/bin/bash
+
+ENV GOOGLE_APPLICATION_CREDENTIALS=secrets/llm-service-account.json
 
 # Tell Python to disable buffering so we don't lose any logs.
 ENV PYTHONUNBUFFERED=1
@@ -26,7 +28,7 @@ RUN set -ex; \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     pip install --no-cache-dir --upgrade pip && \
-    pip install --upgrade pipenv && \
+    pip install pipenv && \
     useradd -ms /bin/bash app -d /home/app -u 1000 -p "$(openssl passwd -1 Passw0rd)" && \
     mkdir -p /app && \
     mkdir -p /persistent && \
@@ -39,17 +41,11 @@ USER app
 WORKDIR /app
 
 # Install python packages
-ADD --chown=app:app Pipfile Pipfile.lock /app/
-    ##Pipfile.lock
+COPY --chown=app:app Pipfile Pipfile.lock /app/
 
-#RUN pipenv --clear
-#RUN pipenv lock --verbose #for more specific info on piplock
 RUN pipenv sync
-# RUN pipenv sync #if already exists
 
 # Add the rest of the source code. This is done last so we don't invalidate all
 # layers when we change a line of code.
-ADD --chown=app:app . /app
+COPY --chown=app:app ../ /app
 
-# Entry point
-ENTRYPOINT ["/bin/bash","./docker-entrypoint.sh"]
