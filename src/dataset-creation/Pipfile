@@ -13,6 +13,10 @@ google-generativeai = "*"
 google-cloud-aiplatform = ">=1.38"
 pandas = "*"
 scikit-learn = "*"
+pytest = "*"
+black = "*"
+flake8 = "*"
+coverage = "*"
 
 [requires]
 python_version = "3.9"

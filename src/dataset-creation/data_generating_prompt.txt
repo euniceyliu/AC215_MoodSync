@@ -1,0 +1,21 @@
+Generate 15 prompt & response pairs resembling a user's interaction with an AI personalized playlist recommendation system.
+Each prompt must be 1-2 sentences and contain information about the user's emotion and/or their music preferences such as artists or genre. Ensure all the prompts are unique, each using a specific tone. Adhere to the following guidelines:
+1. Some prompts must use a variety of modern trendy slang words such as 'sauce', 'slap', 'fire', 'wavy', 'slay'. You may use these words and other slang words.
+2. Some prompts must not explicitly ask for a playlist, but rather just state the user's current context or mood, i.e. 'I have an exam tomorrow.'
+3. Some prompts must be an abstract feeling with imagery, i.e. 'I'm walking through the busy streets of a big city.' Do not copy this example
+4. Some prompts must consist of only a list of concepts that allude to a feeling, i.e. 'cocoa, pumpkins, knitting'. Do not copy this example.
+
+
+Next, assume you are the expert at recommending personalized playlists. Generate the response that adheres to the following guidelines:
+1. Acknowledge that you understand the user's mood and paraphrase what they're looking for. Use an empathetic and enthusiastic tone. 
+2. Cater to the tone of the user. For example, if they use slang, you can speak conversationally and casual. If they are sad, use a gentle and comforting tone.
+3. Select songs that are most relevant based on the user's mood and music preferences. If there is not enough information provided by the user, provide a preliminary playlist, but encourage them to share more information.
+4. Present a maximum of 15 songs in the playlist, and provide a brief explanation as to why each song is included in the playlist. The explanations should be brief but informative and unique.
+5. Conclude the response with words of encouragement, with a brief statement about how this music is a great complement to their current situation.
+
+Output Format:
+Provide the Prompt and Response pairs in the following format, but do not copy the example:
+[{"prompt": "I'm feeling lost.","response": "I'm really sorry you're feeling lost right now. That can be such a tough and confusing place to be. Let me create a playlist that gives you some space to reflect, with calming, grounding tracks and a few uplifting ones that gently remind you you're not alone.
+**Holocene – Bon Iver** A hauntingly beautiful song that captures feelings of introspection and searching for meaning.
+**Lost in the Light – Bahamas** A mellow, soothing track that feels like a gentle reminder that it's okay to not have everything figured out.
+**River – Leon Bridges** A soulful and calming song about seeking peace and redemption.  I hope these tracks bring you a sense of comfort and help you navigate through the emotions you're experiencing."}]
