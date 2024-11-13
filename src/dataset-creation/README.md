@@ -16,7 +16,7 @@ This will call an LLM to process each row in the dataset and generate correspond
 It uses the following system instruction to instruct the LLM on how to generate the data:
 ```
 SYSTEM_INSTRUCTION = """Here is a playlist of songs with the playlist title and description. Using information from
-the title, description, and playlist content, generate a natural language prompt that a user might input into an AI 
+the title, description, and playlist content, generate a natural language prompt that a user might input into an AI
 playlist generator to obtain the playlist of interest. You do not have to have to use the exact wording in the title/description,
 but use the information to infer the underlying context/emotion to generate a unique prompt. The prompt must follow least one of the following guidelines:
 1. Use modern day slang words such as 'sauce', 'slap', 'fire', 'wavy'.
@@ -25,7 +25,7 @@ but use the information to infer the underlying context/emotion to generate a un
 4. You may make up reasonable details to include in the prompt if the title/description are not informative enough.
 
 Next, assume you are an expert at recommending personalized playlists. Embed the provided playlist recommendation in natural language with the following guidelines:
-1. Acknowledge that you understand the user's needs and their emotions. Use an empathetic and enthusiastic tone. 
+1. Acknowledge that you understand the user's needs and their emotions. Use an empathetic and enthusiastic tone.
 2. Cater to the tone of the user. For example, if they use slang, you can speak conversationally and casual. If they are sad, use a gentle and comforting tone.
 3. Present a maximum of 15 songs in the playlist, and provide a brief explanation as to why each song is included in the playlist.
 
@@ -57,7 +57,7 @@ Run:
 This will prepare the previously created data in a format that is compatible for fine-tuning gemini models in Vertex AI. It performs a train test split and creates the train.jsonl and test.jsonl files that will be used for fine-tuning the LLM model.
 
 ## Alternatively, generate data without a playlist dataset by using an LLM
-Part of our fine-tuning experimentation involved using different datasets to finetune the LLM. Thus, rather than using the user-generated playlists from the Spotify playlist dataset, we also used an LLM to generate prompt-response pairs that mimic a user's interaction with an AI playlist generator. 
+Part of our fine-tuning experimentation involved using different datasets to finetune the LLM. Thus, rather than using the user-generated playlists from the Spotify playlist dataset, we also used an LLM to generate prompt-response pairs that mimic a user's interaction with an AI playlist generator.
 Run:
 
 `python cli.py --generate_data_llm`
@@ -73,7 +73,7 @@ Each prompt must be 1-2 sentences and contain information about the user's emoti
 
 
 Next, assume you are the expert at recommending personalized playlists. Generate the response that adheres to the following guidelines:
-1. Acknowledge that you understand the user's mood and paraphrase what they're looking for. Use an empathetic and enthusiastic tone. 
+1. Acknowledge that you understand the user's mood and paraphrase what they're looking for. Use an empathetic and enthusiastic tone.
 2. Cater to the tone of the user. For example, if they use slang, you can speak conversationally and casual. If they are sad, use a gentle and comforting tone.
 3. Select songs that are most relevant based on the user's mood and music preferences. If there is not enough information provided by the user, provide a preliminary playlist, but encourage them to share more information.
 4. Present a maximum of 15 songs in the playlist, and provide a brief explanation as to why each song is included in the playlist. The explanations should be brief but informative and unique.

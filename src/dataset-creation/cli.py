@@ -43,7 +43,8 @@ safety_settings = [
 
 FILENAME = "prompt_playlist_data.txt"
 
-SYSTEM_INSTRUCTION = """Here is a playlist of songs with the playlist title and description. Using
+SYSTEM_INSTRUCTION = """Here is a playlist of songs with the playlist title
+and description. Using
 information from the title, description, and playlist content, generate a
 natural language prompt that a user might input into an AI playlist generator
 to obtain the playlist of interest. You do not have to use the exact wording
@@ -86,7 +87,8 @@ you navigate through the emotions you're experiencing."},
 """
 
 
-SYSTEM_INSTRUCTION_LLM = """Generate 15 prompt & response pairs resembling a user's interaction with an
+SYSTEM_INSTRUCTION_LLM = """Generate 15 prompt & response pairs resembling
+a user's interaction with an
 AI personalized playlist recommendation system. Each prompt must be 1-2
 sentences and contain information about the user's emotion and/or their music
 preferences such as artists or genre. Ensure all the prompts are unique, each
@@ -152,9 +154,7 @@ def generate_data(file_path):
                   Songs: {songs}"
         time.sleep(2)
         response = generative_model.generate_content(
-            [query],
-            generation_config=generation_config,
-            stream=False
+            [query], generation_config=generation_config, stream=False
         )
         generated_text = response.text
         print("Writing data file...")

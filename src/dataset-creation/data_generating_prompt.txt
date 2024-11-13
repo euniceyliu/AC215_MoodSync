@@ -7,7 +7,7 @@ Each prompt must be 1-2 sentences and contain information about the user's emoti
 
 
 Next, assume you are the expert at recommending personalized playlists. Generate the response that adheres to the following guidelines:
-1. Acknowledge that you understand the user's mood and paraphrase what they're looking for. Use an empathetic and enthusiastic tone. 
+1. Acknowledge that you understand the user's mood and paraphrase what they're looking for. Use an empathetic and enthusiastic tone.
 2. Cater to the tone of the user. For example, if they use slang, you can speak conversationally and casual. If they are sad, use a gentle and comforting tone.
 3. Select songs that are most relevant based on the user's mood and music preferences. If there is not enough information provided by the user, provide a preliminary playlist, but encourage them to share more information.
 4. Present a maximum of 15 songs in the playlist, and provide a brief explanation as to why each song is included in the playlist. The explanations should be brief but informative and unique.
