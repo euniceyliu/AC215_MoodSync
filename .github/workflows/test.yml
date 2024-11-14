@@ -20,4 +20,20 @@ jobs:
 
     - name: Run tests in Docker container
       run: |
-        docker run --rm test-image pipenv run pytest -v
+        docker run --rm \
+          -v ${{ github.workspace }}/coverage:/app/coverage \
+          test-image \
+          pipenv run pytest --cov=src --cov-report=xml:/app/coverage/coverage.xml \
+          --cov-report=html:/app/coverage/html
+
+    - name: Upload Coverage Report (XML)
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report-xml
+        path: coverage/coverage.xml
+
+    - name: Upload Coverage Report (HTML)
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report-html
+        path: coverage/html
