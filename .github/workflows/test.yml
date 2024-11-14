@@ -1,0 +1,23 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [ milestone4 ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build Docker image
+      run: docker build -t test-image -f src/Dockerfile .
+
+    - name: Run tests in Docker container
+      run: |
+        docker run --rm test-image pipenv run pytest -v
