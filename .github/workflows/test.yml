@@ -12,6 +12,9 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v2
 
+    - name: Set permissions for coverage directory
+      run: mkdir -p ${{ github.workspace }}/coverage && chmod -R 777 ${{ github.workspace }}/coverage
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
