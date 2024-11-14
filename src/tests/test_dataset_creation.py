@@ -2,14 +2,20 @@ import unittest
 from unittest.mock import patch, MagicMock, call
 import pandas as pd
 import sys
-import os
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "dataset-creation"))
+sys.path.insert(
+    0, 
+    str(
+        Path(__file__)
+        .resolve()
+        .parent
+        .parent / "dataset-creation"
+    )
+)
 
 from cli import generate_data, generate_data_llm, prepare, upload
 
-#Test commit
 
 class TestGenerateData(unittest.TestCase):
     @patch("cli.GenerativeModel")
