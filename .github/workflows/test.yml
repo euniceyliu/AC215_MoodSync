@@ -27,13 +27,13 @@ jobs:
           --cov-report=html:/app/coverage/html
 
     - name: Upload Coverage Report (XML)
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: coverage-report-xml
         path: coverage/coverage.xml
 
     - name: Upload Coverage Report (HTML)
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: coverage-report-html
         path: coverage/html
