@@ -1,11 +1,11 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "e5c863991c52dcf1af60d1db8905ec2d2f1865464d4c3c674c809d5467d13570"
+            "sha256": "2c7d11e222eaa36407d5844c8773917f22de2e42042bbf4dbd5c536d3b60bc87"
         },
         "pipfile-spec": 6,
         "requires": {
-            "python_version": "3.9"
+            "python_version": "3.11"
         },
         "sources": [
             {
@@ -328,6 +328,9 @@
             "version": "==0.2.0"
         },
         "google-cloud-aiplatform": {
+            "extras": [
+                "all"
+            ],
             "hashes": [
                 "sha256:50611d3d51ff92d80f866e5e0f145daac9d943499c6d715250a9947eca4774f2",
                 "sha256:a75dbeda47eaecb7bb2b1801b9c8dfe72a14f76a649525cdff496646214a7afb"
@@ -495,6 +498,7 @@
                 "sha256:f9fff78ba10d4250bfc07a01bd6254a6d87dc67f9627adece85c0b2ed754fa96",
                 "sha256:fa0c739ad8b1996bd24823950e3cb5152ae91fca1c09cc791190bf1627ffefba"
             ],
+            "markers": "python_version >= '3.8'",
             "version": "==1.67.1"
         },
         "grpcio-status": {

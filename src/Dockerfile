@@ -1,5 +1,5 @@
 # Use the official Debian-hosted Python image
-FROM python:3.9-slim-buster
+FROM python:3.11-slim-buster
 
 ARG DEBIAN_PACKAGES="build-essential git screen vim"
 
@@ -47,5 +47,5 @@ RUN pipenv sync
 
 # Add the rest of the source code. This is done last so we don't invalidate all
 # layers when we change a line of code.
-COPY --chown=app:app ../ /app
+COPY --chown=app:app . /app
 

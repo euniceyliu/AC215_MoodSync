@@ -19,7 +19,7 @@ import agent_tools
 
 
 # Setup
-GCP_PROJECT = os.environ["GCP_PROJECT"]
+GCP_PROJECT = "ac215-project-438523"
 GCP_LOCATION = "us-central1"
 EMBEDDING_MODEL = "text-embedding-004"
 EMBEDDING_DIMENSION = 256
@@ -98,24 +98,6 @@ def generate_query_embedding(query):
     return embeddings[0].values
 
 
-def generate_text_embeddings(
-    chunks, dimensionality: int = 256, batch_size=250
-):
-    all_embeddings = []
-    for i in range(0, len(chunks), batch_size):
-        batch = chunks[i : i + batch_size]
-        inputs = [
-            TextEmbeddingInput(text, "RETRIEVAL_DOCUMENT") for text in batch
-        ]
-        kwargs = (
-            dict(output_dimensionality=dimensionality)
-            if dimensionality
-            else {}
-        )
-        embeddings = embedding_model.get_embeddings(inputs, **kwargs)
-        all_embeddings.extend([embedding.values for embedding in embeddings])
-    return all_embeddings
-
 
 def load_text_embeddings(df, collection, batch_size=500):
     """Load text embeddings into ChromaDB with preserved metadata"""
@@ -160,7 +142,7 @@ def load_text_embeddings(df, collection, batch_size=500):
     )
 
 
-def load(method="semantic-split"):
+def load(method="semantic-split-full-lyrics"):
     print(f"load() using method: {method}")
 
     client = chromadb.HttpClient(host=CHROMADB_HOST, port=CHROMADB_PORT)
@@ -211,7 +193,7 @@ def print_results(results):
         print("-" * 80)
 
 
-def query(method="semantic-split"):
+def query(method="semantic-split-full-lyrics"):
     print("query()")
 
     # Connect to chroma DB
@@ -220,7 +202,7 @@ def query(method="semantic-split"):
     # Get collection
     collection_name = f"{method}-song-collection"
 
-    query = """pre-game energy, we like edm"""
+    query = """love song"""
     query_embedding = generate_query_embedding(query)
     print("Embedding values:", query_embedding)
 
@@ -252,30 +234,17 @@ def query(method="semantic-split"):
     print_results(artist_results)
 
     # 3: Query with lexical search
-    print("\n3. Query with Lexical Search: contains reminising")
+    print("\n3. Query with Lexical Search:")
     lexical_results = collection.query(
         query_embeddings=[query_embedding],
         n_results=3,
-        where_document={"$contains": "reminising"},
+        where_document={"$contains": "beach"},
         include=["documents", "metadatas", "distances"],
     )
     print_results(lexical_results)
 
 
-# flatten metadata
-def extract_strings(item):
-    if isinstance(item, dict):
-        # Extract string values from the dictionary (adjust as needed)
-        return " ".join(str(v) for v in item.values())
-    elif isinstance(item, list):
-        # Recursively flatten lists and extract strings
-        return " ".join(map(extract_strings, item))
-    else:
-        # Convert non-string items to strings directly
-        return str(item)
-
-
-def chat(method="semantic-split"):
+def chat(method="semantic-split-full-lyrics"):
     print("chat()")
 
     # Connect to chroma DB
@@ -313,7 +282,7 @@ def chat(method="semantic-split"):
     print("LLM Response:", generated_text)
 
 
-def agent(method="semantic-split"):
+def agent(method="semantic-split-full-lyrics"):
     print("agent()")
 
     # Connect to chroma DB
@@ -396,7 +365,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--chunk_type",
-        default="semantic-split",
+        default="semantic-split-full-lyrics",
         choices=[
             "char-split",
             "recursive-split",
