@@ -23,7 +23,7 @@ jobs:
         docker run --rm \
           -v ${{ github.workspace }}/coverage:/app/coverage \
           test-image \
-          pipenv run pytest --cov=your_module --cov-report=xml:/app/coverage/coverage.xml \
+          pipenv run pytest --cov=src --cov-report=xml:/app/coverage/coverage.xml \
           --cov-report=html:/app/coverage/html
 
     - name: Upload Coverage Report (XML)
