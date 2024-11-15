@@ -37,11 +37,10 @@ RUN set -ex; \
     rm -rf /var/lib/apt/lists/* && \
     pip install --no-cache-dir --upgrade pip && \
     pip install pipenv && \
-    pip install gcsfs && \
     useradd -ms /bin/bash app -d /home/app -u 1000 -p "$(openssl passwd -1 Passw0rd)" && \
     mkdir -p /app && \
-    mkdir -p /persistent && \
-    chown app:app /persistent && \
+    #mkdir -p /persistent && \
+    #chown app:app /persistent && \
     chown app:app /app
 
 
