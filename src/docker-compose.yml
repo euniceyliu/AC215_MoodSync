@@ -10,8 +10,12 @@ services:
             - chromadb
         command: ["tail", "-f", "/dev/null"]
         volumes:
-            - .:/app
-            - ./coverage:/app/coverage
+            - .:/app:delegated
+            - ./coverage:/app/coverage:delegated
+        environment:
+            - COVERAGE_FILE=/app/coverage/.coverage
+            - PYTHONPATH=/app/src
+        user: "${UID:-1000}:${GID:-1000}"
     chromadb:
         image: chromadb/chroma:0.5.5
         container_name: llm-rag-chromadb
