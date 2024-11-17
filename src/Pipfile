@@ -18,7 +18,15 @@ black = "*"
 flake8 = "*"
 coverage = "*"
 pytest-cov = "*"
-
+numpy = "*"
+llama-index = "*"
+argparse = "*"
+chromadb = "*"
+vertexai = "*"
+langchain = "*"
+agent_tools = "*"
+gcsfs = "*"
+langchain-community = "*"
 
 [requires]
 python_version = "3.11"

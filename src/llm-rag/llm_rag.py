@@ -31,7 +31,7 @@ CHROMADB_HOST = "llm-rag-chromadb-chat"
 CHROMADB_PORT = 8000
 vertexai.init(project=GCP_PROJECT, location=GCP_LOCATION)
 
-embedding_model = TextEmbeddingModel.from_pretrained(EMBEDDING_MODEL)
+
 
 
 SYSTEM_INSTRUCTION = """
@@ -84,6 +84,7 @@ finetuned_model = GenerativeModel(
 
 
 def generate_query_embedding(query):
+    embedding_model = TextEmbeddingModel.from_pretrained(EMBEDDING_MODEL)
     query_embedding_inputs = [
         TextEmbeddingInput(task_type="RETRIEVAL_DOCUMENT", text=query)
     ]

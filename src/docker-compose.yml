@@ -1,0 +1,21 @@
+networks:
+    default:
+        name: llm-rag-network
+        external: true
+services:
+    test-image:
+        image: test-image
+        container_name: test-image-container
+        depends_on:
+            - chromadb
+    chromadb:
+        image: chromadb/chroma:0.5.5
+        container_name: llm-rag-chromadb
+        ports:
+            - 8000:8000
+        volumes:
+            - ./docker-volumes/chromadb:/chroma/chroma
+        environment:
+            - IS_PERSISTENT=TRUE
+            - ANONYMIZED_TELEMETRY=FALSE
+            - CHROMA_SERVER_CORS_ALLOW_ORIGINS=["*"] # This is not recommended for production environments.
