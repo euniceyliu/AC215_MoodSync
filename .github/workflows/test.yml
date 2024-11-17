@@ -9,12 +9,10 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v2
 
-    - name: Create coverage directories with proper permissions
+    - name: Create coverage directories
       run: |
         mkdir -p ${{ github.workspace }}/coverage
         mkdir -p ${{ github.workspace }}/src/.coverage
-        chmod -R 777 ${{ github.workspace }}/coverage
-        chmod -R 777 ${{ github.workspace }}/src/.coverage
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -40,10 +38,6 @@ jobs:
       run: |
         CONTAINER_NAME=$(docker-compose -f src/docker-compose.yml ps -q test-image)
         echo "Container ID: $CONTAINER_NAME"
-        # Create coverage directory inside container
-        docker exec $CONTAINER_NAME mkdir -p /app/.coverage
-        docker exec $CONTAINER_NAME chmod 777 /app/.coverage
-        # Run tests with coverage
         docker exec -e COVERAGE_FILE=/app/.coverage/.coverage $CONTAINER_NAME pipenv run pytest \
           --cov=src \
           --cov-report=xml:/app/coverage/coverage.xml \

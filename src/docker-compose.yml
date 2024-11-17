@@ -8,9 +8,10 @@ services:
         container_name: test-image-container
         volumes:
             - ../src:/app
+            - ./coverage:/app/coverage:delegated
         depends_on:
             - chromadb
-        command: ["tail", "-f", "/dev/null"] 
+        command: ["tail", "-f", "/dev/null"]
     chromadb:
         image: chromadb/chroma:0.5.5
         container_name: llm-rag-chromadb
