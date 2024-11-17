@@ -8,10 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.11'
 
@@ -22,11 +22,11 @@ jobs:
 
       - name: Create coverage directory
         run: |
-          mkdir -p ${{ github.workspace }}/coverage
-          chmod -R 777 ${{ github.workspace }}/coverage
+          mkdir -p coverage
+          chmod -R 777 coverage
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Install Docker Compose
         run: |
@@ -65,8 +65,10 @@ jobs:
           CONTAINER_NAME=$(docker-compose ps -q test-image)
           echo "Container ID: $CONTAINER_NAME"
           
+          # Ensure coverage directory exists and has proper permissions
           docker exec $CONTAINER_NAME bash -c "mkdir -p /coverage && chmod -R 777 /coverage"
           
+          # Run tests with explicit coverage path
           docker exec \
             -e COVERAGE_FILE=/coverage/.coverage \
             $CONTAINER_NAME \
@@ -76,9 +78,6 @@ jobs:
             --cov-report=xml:/coverage/coverage.xml \
             --cov-report=html:/coverage/htmlcov \
             tests/ -v"
-          
-          echo "Coverage directory contents in container:"
-          docker exec $CONTAINER_NAME ls -la /coverage
 
       - name: Copy coverage reports
         if: always()
@@ -86,47 +85,32 @@ jobs:
           cd src
           CONTAINER_NAME=$(docker-compose ps -q test-image)
           
-          mkdir -p ${{ github.workspace }}/coverage
-          chmod -R 777 ${{ github.workspace }}/coverage
+          # Create coverage directory in workspace
+          mkdir -p coverage
+          chmod -R 777 coverage
           
-          echo "Container coverage directory contents:"
-          docker exec $CONTAINER_NAME ls -la /coverage
+          # Copy coverage files from container
+          docker cp $CONTAINER_NAME:/coverage/coverage.xml ./coverage/
+          docker cp $CONTAINER_NAME:/coverage/htmlcov ./coverage/
           
-          echo "Copying coverage files..."
-          docker cp $CONTAINER_NAME:/coverage/. ${{ github.workspace }}/coverage/
-          
-          echo "Local coverage directory contents:"
-          ls -la ${{ github.workspace }}/coverage
-          
-          sudo chown -R $(id -u):$(id -g) ${{ github.workspace }}/coverage
+          echo "Coverage files in ./coverage:"
+          ls -la coverage/
 
       - name: Upload Coverage Report (XML)
         if: always()
-        continue-on-error: true
         uses: actions/upload-artifact@v3
         with:
           name: coverage-report-xml
-          path: ${{ github.workspace }}/coverage/coverage.xml
+          path: src/coverage/coverage.xml
           if-no-files-found: warn
 
       - name: Upload Coverage Report (HTML)
         if: always()
-        continue-on-error: true
         uses: actions/upload-artifact@v3
         with:
           name: coverage-report-html
-          path: ${{ github.workspace }}/coverage/htmlcov
+          path: src/coverage/htmlcov
           if-no-files-found: warn
-
-      - name: Verify Coverage Files
-        if: always()
-        run: |
-          echo "Current directory:"
-          pwd
-          echo "Coverage directory contents:"
-          ls -la ${{ github.workspace }}/coverage || echo "Coverage directory not found"
-          echo "Full directory structure:"
-          find ${{ github.workspace }} -name "coverage.xml" -o -name "htmlcov"
 
       - name: Cleanup
         if: always()
