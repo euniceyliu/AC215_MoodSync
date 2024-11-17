@@ -1,19 +1,16 @@
 name: Run Tests
-
 on:
   push:
     branches: [ milestone4 ]
-
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
     - name: Check out code
       uses: actions/checkout@v2
 
     - name: Set permissions for coverage directory
-      run: mkdir -p ${{ github.workspace }}/coverage && chmod -R 777 ${{ github.workspace }}/coverage
+      run: mkdir -p coverage && chmod -R 777 coverage
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -24,32 +21,49 @@ jobs:
         sudo chmod +x /usr/local/bin/docker-compose
 
     - name: Create external Docker network
-      run: docker network create llm-rag-network
+      run: docker network create llm-rag-network || true
 
-    - name: Build Docker image
-      run: docker build -t test-image -f src/Dockerfile .
-      
-    - name: Run docker compose
-      run: docker-compose -f src/docker-compose.yml up -d
-
-    - name: Run tests
+    - name: Build and start services
       run: |
-        docker exec test-image-container \
-        pipenv run pytest --cov=src \
-        --cov-report=xml:/app/coverage/coverage.xml \
-        --cov-report=html:/app/coverage/html
+        docker-compose -f src/docker-compose.yml build
+        docker-compose -f src/docker-compose.yml up -d
 
-    - name: Copy coverage reports from container
-      run: docker cp test-image-container:/app/coverage ${{ github.workspace }}/coverage
-      
+    - name: List containers
+      run: docker ps -a
+
+    - name: Run tests with coverage
+      run: |
+        docker-compose -f src/docker-compose.yml exec -T app \
+        pytest src/tests/ \
+        --cov=src \
+        --cov-report=xml:coverage/coverage.xml \
+        --cov-report=html:coverage/html
+        
+    - name: List coverage directory in container
+      run: |
+        container_id=$(docker-compose -f src/docker-compose.yml ps -q app)
+        docker exec $container_id ls -la coverage/
+
+    - name: Copy coverage reports
+      run: |
+        container_id=$(docker-compose -f src/docker-compose.yml ps -q app)
+        docker cp $container_id:coverage/. coverage/
+
+    - name: List local coverage directory
+      run: ls -la coverage/
+
     - name: Upload Coverage Report (XML)
       uses: actions/upload-artifact@v3
       with:
         name: coverage-report-xml
-        path: ${{ github.workspace }}/coverage/coverage.xml
+        path: coverage/coverage.xml
 
     - name: Upload Coverage Report (HTML)
       uses: actions/upload-artifact@v3
       with:
         name: coverage-report-html
-        path: ${{ github.workspace }}/coverage/html
+        path: coverage/html
+
+    - name: Cleanup
+      if: always()
+      run: docker-compose -f src/docker-compose.yml down
