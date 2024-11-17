@@ -1,7 +1,10 @@
+version: '3.8'
+
 networks:
     default:
         name: llm-rag-network
         external: true
+
 services:
     test-image:
         image: test-image
@@ -11,11 +14,12 @@ services:
         command: ["tail", "-f", "/dev/null"]
         volumes:
             - .:/app:delegated
-            - ./coverage:/app/coverage:delegated
+            - ./coverage:/app/coverage:z
         environment:
             - COVERAGE_FILE=/app/coverage/.coverage
             - PYTHONPATH=/app/src
-        user: "${UID:-1000}:${GID:-1000}"
+        user: root  # Change this to root temporarily for test execution
+    
     chromadb:
         image: chromadb/chroma:0.5.5
         container_name: llm-rag-chromadb
