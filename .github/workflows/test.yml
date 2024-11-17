@@ -1,13 +1,10 @@
 name: Run Tests
-
 on:
   push:
     branches: [ milestone4 ]
-
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
     - name: Check out code
       uses: actions/checkout@v2
@@ -24,32 +21,51 @@ jobs:
         sudo chmod +x /usr/local/bin/docker-compose
 
     - name: Create external Docker network
-      run: docker network create llm-rag-network
+      run: docker network create llm-rag-network || true
 
     - name: Build Docker image
       run: docker build -t test-image -f src/Dockerfile .
       
     - name: Run docker compose
-      run: docker-compose -f src/docker-compose.yml up -d
+      run: |
+        docker-compose -f src/docker-compose.yml up -d
+        docker ps
+        sleep 10  # Give containers time to start up properly
 
     - name: Run tests
       run: |
-        docker exec test-image-container \
+        CONTAINER_NAME=$(docker-compose -f src/docker-compose.yml ps -q test-image)
+        echo "Container ID: $CONTAINER_NAME"
+        docker exec $CONTAINER_NAME \
         pipenv run pytest --cov=src \
         --cov-report=xml:/app/coverage/coverage.xml \
         --cov-report=html:/app/coverage/html
+        
+    - name: List container contents
+      run: |
+        CONTAINER_NAME=$(docker-compose -f src/docker-compose.yml ps -q test-image)
+        echo "Listing /app/coverage in container..."
+        docker exec $CONTAINER_NAME ls -la /app/coverage
 
     - name: Copy coverage reports from container
-      run: docker cp test-image-container:/app/coverage ${{ github.workspace }}/coverage
-      
+      run: |
+        CONTAINER_NAME=$(docker-compose -f src/docker-compose.yml ps -q test-image)
+        echo "Container name: $CONTAINER_NAME"
+        echo "Copying coverage reports..."
+        docker cp $CONTAINER_NAME:/app/coverage/. ${{ github.workspace }}/coverage/
+        echo "Listing copied files..."
+        ls -la ${{ github.workspace }}/coverage
+
     - name: Upload Coverage Report (XML)
       uses: actions/upload-artifact@v3
       with:
         name: coverage-report-xml
         path: ${{ github.workspace }}/coverage/coverage.xml
+        if-no-files-found: error
 
     - name: Upload Coverage Report (HTML)
       uses: actions/upload-artifact@v3
       with:
         name: coverage-report-html
         path: ${{ github.workspace }}/coverage/html
+        if-no-files-found: error
