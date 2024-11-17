@@ -35,8 +35,8 @@ jobs:
     - name: Ensure writable directories
       run: |
         CONTAINER_NAME=$(docker-compose -f src/docker-compose.yml ps -q test-image)
-        docker exec $CONTAINER_NAME mkdir -p /tmp /app/coverage
-        docker exec $CONTAINER_NAME chmod -R 777 /tmp /app/coverage
+        docker exec --user root mkdir -p /tmp /app/coverage
+        docker exec --user root chmod -R 777 /tmp /app/coverage
 
     - name: Run tests
       run: |
