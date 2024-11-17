@@ -39,6 +39,9 @@ jobs:
         --cov-report=xml:/app/coverage/coverage.xml \
         --cov-report=html:/app/coverage/html
 
+    - name: Copy coverage reports from container
+      run: docker cp test-image-container:/app/coverage ${{ github.workspace }}/coverage
+      
     - name: Upload Coverage Report (XML)
       uses: actions/upload-artifact@v3
       with:
