@@ -20,23 +20,29 @@ jobs:
 
     - name: Build Docker image
       run: docker build -t test-image -f src/Dockerfile .
+      
+    - name: Run docker compose
+      run: docker-compose -f src/docker-compose.yml up -d
 
-    - name: Run tests in Docker container
+    - name: Run tests inside the container
       run: |
-        docker run --rm \
-          -v ${{ github.workspace }}/coverage:/app/coverage \
-          test-image \
-          pipenv run pytest --cov=src --cov-report=xml:/app/coverage/coverage.xml \
-          --cov-report=html:/app/coverage/html
+        docker exec test-image \
+        pipenv run pytest --cov=src \
+        --cov-report=xml:/app/coverage/coverage.xml \
+        --cov-report=html:/app/coverage/html
+
+    - name: Copy coverage reports from container
+      run: |
+        docker cp test-image:/app/coverage ${{ github.workspace }}/coverage
 
     - name: Upload Coverage Report (XML)
       uses: actions/upload-artifact@v3
       with:
         name: coverage-report-xml
-        path: coverage/coverage.xml
+        path: ${{ github.workspace }}/coverage/coverage.xml
 
     - name: Upload Coverage Report (HTML)
       uses: actions/upload-artifact@v3
       with:
         name: coverage-report-html
-        path: coverage/html
+        path: ${{ github.workspace }}/coverage/html
