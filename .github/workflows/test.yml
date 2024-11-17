@@ -36,8 +36,7 @@ jobs:
       run: |
         CONTAINER_NAME=$(docker-compose -f src/docker-compose.yml ps -q test-image)
         echo "Container ID: $CONTAINER_NAME"
-        docker exec $CONTAINER_NAME \
-        pipenv run pytest --cov=src \
+        PIPENV_PIPFILE=src/Pipfile pipenv run pytest --cov=src \
         --cov-report=xml:/app/coverage/coverage.xml \
         --cov-report=html:/app/coverage/html
         
