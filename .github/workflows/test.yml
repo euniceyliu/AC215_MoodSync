@@ -34,8 +34,8 @@ jobs:
       - name: Setup test environment
         run: |
           cd src
-          mkdir -p .coverage-reports .pytest_cache
-          sudo chown -R 1000:1000 .coverage-reports .pytest_cache
+          mkdir -p .coverage-reports/htmlcov .pytest_cache
+          sudo chown -R root:root .coverage-reports .pytest_cache
           sudo chmod -R 777 .coverage-reports .pytest_cache
           
           touch Pipfile
@@ -66,44 +66,58 @@ jobs:
           # Create a shell script to run the tests
           cat << 'EOF' > run_tests.sh
           #!/bin/bash
+          set -e  # Exit on error
+          
           cd /app
           
           # Ensure directories exist with correct permissions
           mkdir -p .coverage-reports/htmlcov .pytest_cache
-          chown -R app:app .coverage-reports .pytest_cache
           chmod -R 777 .coverage-reports .pytest_cache
           
-          # Run tests with explicit paths
+          # Run tests with coverage
           PYTHONPATH=/app \
-          COVERAGE_FILE=/app/.coverage-reports/.coverage \
-          pipenv run pytest \
-            --cov=. \
+          pytest \
+            --cov=dataset-creation \
             --cov-report=term-missing \
-            --cov-report=xml:/app/.coverage-reports/coverage.xml \
-            --cov-report=html:/app/.coverage-reports/htmlcov \
+            --cov-report=xml:.coverage-reports/coverage.xml \
+            --cov-report=html:.coverage-reports/htmlcov \
             tests/ -v
           
+          # Verify coverage files exist
+          ls -la .coverage-reports/
+          ls -la .coverage-reports/htmlcov/
+          
           # Fix permissions for generated files
-          find .coverage-reports -type d -exec chmod 777 {} +
-          find .coverage-reports -type f -exec chmod 666 {} +
+          chmod -R 777 .coverage-reports
           EOF
           
           chmod +x run_tests.sh
           docker cp run_tests.sh $CONTAINER_NAME:/app/
           docker exec --user root $CONTAINER_NAME bash -c "/app/run_tests.sh"
+          
+          # Verify files on host
+          echo "Coverage files on host:"
+          ls -la .coverage-reports/
+          ls -la .coverage-reports/htmlcov/
 
-      - name: Fix permissions
+      - name: Debug Coverage Files
         run: |
           cd src
-          sudo chown -R $(id -u):$(id -g) .coverage-reports
-          sudo chmod -R 777 .coverage-reports
+          echo "Current directory contents:"
+          ls -la
+          echo "Coverage directory contents:"
+          ls -la .coverage-reports/ || echo "Coverage directory not found"
+          echo "HTML coverage directory contents:"
+          ls -la .coverage-reports/htmlcov/ || echo "HTML coverage directory not found"
 
       - name: Upload Coverage Report (XML)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report-xml
-          path: src/.coverage-reports/coverage.xml
+          path: |
+            src/.coverage-reports/coverage.xml
+            src/.coverage-reports/.coverage
           if-no-files-found: error
 
       - name: Upload Coverage Report (HTML)

@@ -11,15 +11,15 @@ services:
     container_name: test-image-container
     volumes:
       - .:/app:delegated
-      - ./.coverage-reports:/app/.coverage-reports
-      - ./.pytest_cache:/app/.pytest_cache
+      - ./.coverage-reports:/app/.coverage-reports:rw
+      - ./.pytest_cache:/app/.pytest_cache:rw
       - pip-cache:/home/app/.local
     depends_on:
       - chromadb
     command: ["tail", "-f", "/dev/null"]
     environment:
       - PYTHONPATH=/app
-    user: "root"  # Changed to root for permission handling
+    user: "root"
   
   chromadb:
     image: chromadb/chroma:0.5.5
