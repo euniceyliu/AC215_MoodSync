@@ -32,12 +32,6 @@ jobs:
         docker ps
         sleep 10  # Give containers time to start up properly
 
-    - name: Ensure writable directories
-      run: |
-        CONTAINER_NAME=$(docker-compose -f src/docker-compose.yml ps -q test-image)
-        docker exec --user root mkdir -p /tmp /app/coverage
-        docker exec --user root chmod -R 777 /tmp /app/coverage
-
     - name: Run tests
       run: |
         CONTAINER_NAME=$(docker-compose -f src/docker-compose.yml ps -q test-image)
