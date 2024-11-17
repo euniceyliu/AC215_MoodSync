@@ -50,11 +50,11 @@ jobs:
             chmod 666 Pipfile.lock
             chmod -R 777 .
 
-- name: Build Docker image
-      run: |
-        cd src  # Change to src directory first
-        docker build -t test-image .  # Build from current directory
-        docker image ls
+    - name: Build Docker image
+          run: |
+            cd src  # Change to src directory first
+            docker build -t test-image .  # Build from current directory
+            docker image ls
 
     - name: Run docker compose
       run: |
