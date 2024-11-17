@@ -6,11 +6,12 @@ services:
     test-image:
         image: test-image
         container_name: test-image-container
-        volumes:
-            - ../src:/app
         depends_on:
             - chromadb
-        command: ["tail", "-f", "/dev/null"] 
+        command: ["tail", "-f", "/dev/null"]
+        volumes:
+            - .:/app
+            - ./coverage:/app/coverage
     chromadb:
         image: chromadb/chroma:0.5.5
         container_name: llm-rag-chromadb
@@ -21,4 +22,4 @@ services:
         environment:
             - IS_PERSISTENT=TRUE
             - ANONYMIZED_TELEMETRY=FALSE
-            - CHROMA_SERVER_CORS_ALLOW_ORIGINS=["*"] # This is not recommended for production environments.
+            - CHROMA_SERVER_CORS_ALLOW_ORIGINS=["*"]
