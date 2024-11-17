@@ -11,6 +11,7 @@ services:
     container_name: test-image-container
     volumes:
       - ../src:/app:delegated
+      - ./.coverage-reports:/app/.coverage-reports
       - pip-cache:/home/app/.local
     depends_on:
       - chromadb
