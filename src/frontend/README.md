@@ -26,5 +26,5 @@ npm run dev
 ## Code Setup
 1. the `src/app/chat` folder contain the design and set up for the playlist generation page
 2. the `src/app/help` folder contain the design and set up for the help/FAQ page
-3. the ``src/app/about` folder contain the design and set up for the about page
+3. the `src/app/about` folder contain the design and set up for the about page
 
