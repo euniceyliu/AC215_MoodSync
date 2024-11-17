@@ -20,11 +20,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install pipenv
 
-      - name: Create coverage directory
-        run: |
-          mkdir -p coverage
-          chmod -R 777 coverage
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -44,7 +39,6 @@ jobs:
           pipenv install pytest pytest-cov chromadb langchain openai google-cloud-aiplatform --dev
           pipenv lock
           chmod 666 Pipfile.lock
-          chmod -R 777 .
 
       - name: Build Docker image
         run: |
@@ -59,42 +53,30 @@ jobs:
           docker ps
           sleep 15
 
-      - name: Run tests with proper permissions
+      - name: Create coverage directory
+        run: |
+          cd src
+          mkdir -p coverage
+          sudo chmod -R 777 coverage
+
+      - name: Run tests with coverage
         run: |
           cd src
           CONTAINER_NAME=$(docker-compose ps -q test-image)
           echo "Container ID: $CONTAINER_NAME"
           
-          # Ensure coverage directory exists and has proper permissions
-          docker exec $CONTAINER_NAME bash -c "mkdir -p /coverage && chmod -R 777 /coverage"
-          
-          # Run tests with explicit coverage path
           docker exec \
-            -e COVERAGE_FILE=/coverage/.coverage \
+            -e PYTHONPATH=/app \
             $CONTAINER_NAME \
-            bash -c "cd /app && PYTHONPATH=/app pipenv run pytest \
-            --cov=src \
-            --cov-report=term-missing \
-            --cov-report=xml:/coverage/coverage.xml \
-            --cov-report=html:/coverage/htmlcov \
-            tests/ -v"
-
-      - name: Copy coverage reports
-        if: always()
-        run: |
-          cd src
-          CONTAINER_NAME=$(docker-compose ps -q test-image)
-          
-          # Create coverage directory in workspace
-          mkdir -p coverage
-          chmod -R 777 coverage
-          
-          # Copy coverage files from container
-          docker cp $CONTAINER_NAME:/coverage/coverage.xml ./coverage/
-          docker cp $CONTAINER_NAME:/coverage/htmlcov ./coverage/
-          
-          echo "Coverage files in ./coverage:"
-          ls -la coverage/
+            bash -c "cd /app && \
+            mkdir -p /app/coverage && \
+            chmod -R 777 /app/coverage && \
+            pipenv run pytest \
+              --cov=src \
+              --cov-report=term-missing \
+              --cov-report=xml:/app/coverage/coverage.xml \
+              --cov-report=html:/app/coverage/htmlcov \
+              tests/ -v"
 
       - name: Upload Coverage Report (XML)
         if: always()

@@ -11,13 +11,11 @@ services:
     container_name: test-image-container
     volumes:
       - ../src:/app:delegated
-      - coverage-volume:/coverage
       - pip-cache:/home/app/.local
     depends_on:
       - chromadb
     command: ["tail", "-f", "/dev/null"]
     environment:
-      - COVERAGE_FILE=/coverage/.coverage
       - PYTHONPATH=/app
     user: "1000:1000"
   
@@ -34,5 +32,4 @@ services:
       - CHROMA_SERVER_CORS_ALLOW_ORIGINS=["*"]
 
 volumes:
-  coverage-volume:
   pip-cache:
