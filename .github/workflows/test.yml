@@ -1,10 +1,13 @@
 name: Run Tests
+
 on:
   push:
     branches: [ milestone4 ]
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    
     steps:
     - name: Check out code
       uses: actions/checkout@v2
@@ -16,7 +19,7 @@ jobs:
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
-      
+
     - name: Install Docker Compose
       run: |
         sudo curl -L "https://github.com/docker/compose/releases/download/v2.5.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -26,30 +29,41 @@ jobs:
       run: docker network create llm-rag-network || true
 
     - name: Build Docker image
-      run: docker build -t test-image -f src/Dockerfile .
-      
+      run: |
+        docker build -t test-image -f src/Dockerfile .
+        docker image ls
+
     - name: Run docker compose
       run: |
-        docker-compose -f src/docker-compose.yml up -d
+        cd src
+        docker-compose up -d
         docker ps
-        sleep 10  # Give containers time to start up properly
+        sleep 15  # Increased wait time for services to stabilize
 
-    - name: Run tests
+    - name: Run tests with proper permissions
       run: |
-        CONTAINER_NAME=$(docker-compose -f src/docker-compose.yml ps -q test-image)
+        cd src
+        CONTAINER_NAME=$(docker-compose ps -q test-image)
         echo "Container ID: $CONTAINER_NAME"
-        docker exec $CONTAINER_NAME pipenv run pytest \
+        docker exec \
+          -e COVERAGE_FILE=/coverage/.coverage \
+          $CONTAINER_NAME \
+          bash -c "mkdir -p /coverage && chmod 777 /coverage && pipenv run pytest \
           --cov=src \
           --cov-report=xml:/coverage/coverage.xml \
           --cov-report=html:/coverage/html \
-          tests/
+          tests/"
 
     - name: Copy coverage reports
+      if: always()  # Run even if tests fail
       run: |
-        CONTAINER_NAME=$(docker-compose -f src/docker-compose.yml ps -q test-image)
+        cd src
+        CONTAINER_NAME=$(docker-compose ps -q test-image)
         docker cp $CONTAINER_NAME:/coverage/. ${{ github.workspace }}/coverage/
+        sudo chown -R $USER:$USER ${{ github.workspace }}/coverage/
 
     - name: Upload Coverage Report (XML)
+      if: always()
       uses: actions/upload-artifact@v3
       with:
         name: coverage-report-xml
@@ -57,8 +71,16 @@ jobs:
         if-no-files-found: error
 
     - name: Upload Coverage Report (HTML)
+      if: always()
       uses: actions/upload-artifact@v3
       with:
         name: coverage-report-html
         path: ${{ github.workspace }}/coverage/html
         if-no-files-found: error
+
+    - name: Cleanup
+      if: always()
+      run: |
+        cd src
+        docker-compose down
+        docker network rm llm-rag-network || true

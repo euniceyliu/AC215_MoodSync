@@ -8,17 +8,18 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Python wants UTF-8 locale
 ENV LANG=C.UTF-8
 
-# Tell pipenv where the shell is. This allows us to use "pipenv shell" as a
-# container entry point.
+# Tell pipenv where the shell is
 ENV PYENV_SHELL=/bin/bash
 
 ENV GOOGLE_APPLICATION_CREDENTIALS=secrets/llm-service-account.json
 
-# Tell Python to disable buffering so we don't lose any logs.
+# Tell Python to disable buffering so we don't lose any logs
 ENV PYTHONUNBUFFERED=1
 
-# Ensure we have an up to date baseline, install dependencies and
-# create a user so we don't run the app as root
+# Create app user first so we get consistent UID/GID
+RUN useradd -ms /bin/bash app -d /home/app -u 1000 -p "$(openssl passwd -1 Passw0rd)"
+
+# Install system dependencies
 RUN set -ex; \
     for i in $(seq 1 8); do mkdir -p "/usr/share/man/man${i}"; done && \
     apt-get update && \
@@ -28,14 +29,13 @@ RUN set -ex; \
     rm -rf /var/lib/apt/lists/* && \
     pip install --no-cache-dir --upgrade pip && \
     pip install pipenv && \
-    useradd -ms /bin/bash app -d /home/app -u 1000 -p "$(openssl passwd -1 Passw0rd)" && \
     mkdir -p /app && \
     mkdir -p /coverage && \
     chown -R app:app /app && \
     chown -R app:app /coverage && \
     chmod -R 777 /coverage
 
-# Switch to the new user
+# Switch to the app user
 USER app
 WORKDIR /app
 
@@ -44,8 +44,7 @@ COPY --chown=app:app src/Pipfile src/Pipfile.lock /app/
 
 RUN pipenv sync
 
-# Add the rest of the source code. This is done last so we don't invalidate all
-# layers when we change a line of code.
+# Add the rest of the source code
 COPY --chown=app:app . /app
 
 CMD ["/bin/bash"]
