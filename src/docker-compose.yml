@@ -8,7 +8,6 @@ services:
         container_name: test-image-container
         volumes:
             - ../src:/app
-            - ../coverage:/app/coverage
         depends_on:
             - chromadb
         command: ["tail", "-f", "/dev/null"] 
