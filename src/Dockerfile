@@ -43,7 +43,8 @@ WORKDIR /app
 # Install python packages
 COPY --chown=app:app src/Pipfile src/Pipfile.lock /app/
 
-RUN pipenv sync
+# Install both default and development dependencies
+RUN pipenv install --dev
 
 # Add the rest of the source code
 COPY --chown=app:app . /app

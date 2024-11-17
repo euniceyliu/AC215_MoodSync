@@ -31,3 +31,8 @@ importlib-metadata = ">=5.0"
 
 [requires]
 python_version = "3.11"
+
+[
+scripts
+]
+test = "pytest"
