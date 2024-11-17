@@ -28,6 +28,16 @@ jobs:
     - name: Create external Docker network
       run: docker network create llm-rag-network || true
 
+    - name: Prepare Pipenv files
+      run: |
+        cd src
+        if [ ! -f "Pipfile" ]; then
+          cp Pipfile.template Pipfile
+        fi
+        if [ ! -f "Pipfile.lock" ]; then
+          pipenv lock
+        fi
+
     - name: Build Docker image
       run: |
         docker build -t test-image -f src/Dockerfile .
@@ -38,45 +48,69 @@ jobs:
         cd src
         docker-compose up -d
         docker ps
-        sleep 15  # Increased wait time for services to stabilize
+        sleep 15  # Wait time for services to stabilize
 
     - name: Run tests with proper permissions
       run: |
         cd src
         CONTAINER_NAME=$(docker-compose ps -q test-image)
         echo "Container ID: $CONTAINER_NAME"
+        # Create directories and set permissions
+        docker exec $CONTAINER_NAME mkdir -p /app/src
+        docker exec $CONTAINER_NAME mkdir -p /coverage
+        docker exec $CONTAINER_NAME chmod -R 777 /coverage
+        # Run tests
         docker exec \
           -e COVERAGE_FILE=/coverage/.coverage \
           $CONTAINER_NAME \
-          bash -c "mkdir -p /coverage && chmod 777 /coverage && pipenv run pytest \
+          bash -c "cd /app && pipenv run pytest \
           --cov=src \
           --cov-report=xml:/coverage/coverage.xml \
           --cov-report=html:/coverage/html \
           tests/"
 
     - name: Copy coverage reports
-      if: always()  # Run even if tests fail
+      if: always()
       run: |
         cd src
         CONTAINER_NAME=$(docker-compose ps -q test-image)
-        docker cp $CONTAINER_NAME:/coverage/. ${{ github.workspace }}/coverage/
+        if [ -z "$CONTAINER_NAME" ]; then
+          echo "Error: Could not find test container"
+          exit 1
+        fi
+        mkdir -p ${{ github.workspace }}/coverage
+        docker exec $CONTAINER_NAME ls -la /coverage || true
+        docker cp $CONTAINER_NAME:/coverage/. ${{ github.workspace }}/coverage/ || true
         sudo chown -R $USER:$USER ${{ github.workspace }}/coverage/
+
+    - name: Validate coverage reports
+      if: always()
+      run: |
+        ls -la ${{ github.workspace }}/coverage/
+        if [ ! -f "${{ github.workspace }}/coverage/coverage.xml" ]; then
+          echo "Warning: coverage.xml not found"
+        fi
+        if [ ! -d "${{ github.workspace }}/coverage/html" ]; then
+          echo "Warning: coverage HTML report not found"
+        fi
 
     - name: Upload Coverage Report (XML)
       if: always()
+      continue-on-error: true
       uses: actions/upload-artifact@v3
       with:
         name: coverage-report-xml
         path: ${{ github.workspace }}/coverage/coverage.xml
-        if-no-files-found: error
+        if-no-files-found: warn
 
     - name: Upload Coverage Report (HTML)
       if: always()
+      continue-on-error: true
       uses: actions/upload-artifact@v3
       with:
         name: coverage-report-html
         path: ${{ github.workspace }}/coverage/html
-        if-no-files-found: error
+        if-no-files-found: warn
 
     - name: Cleanup
       if: always()

@@ -33,6 +33,7 @@ RUN set -ex; \
     mkdir -p /coverage && \
     chown -R app:app /app && \
     chown -R app:app /coverage && \
+    chmod -R 755 /app && \
     chmod -R 777 /coverage
 
 # Switch to the app user

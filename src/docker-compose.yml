@@ -10,7 +10,7 @@ services:
     image: test-image
     container_name: test-image-container
     volumes:
-      - ..:/app:ro  # Mount as read-only
+      - ..:/app
       - coverage-volume:/coverage
     depends_on:
       - chromadb
