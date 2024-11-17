@@ -33,19 +33,22 @@ RUN set -ex; \
     mkdir -p /coverage && \
     chown -R app:app /app && \
     chown -R app:app /coverage && \
-    chmod -R 755 /app && \
+    chmod -R 777 /app && \
     chmod -R 777 /coverage
+
+# Create a directory for python packages
+RUN mkdir -p /home/app/.local && \
+    chown -R app:app /home/app/.local
 
 # Switch to the app user
 USER app
 WORKDIR /app
 
-# Install python packages
-COPY --chown=app:app src/Pipfile src/Pipfile.lock /app/
-
-RUN pipenv sync
+# Copy Pipfile and install dependencies
+COPY --chown=app:app Pipfile Pipfile.lock ./
+RUN pipenv install --deploy --ignore-pipfile
 
 # Add the rest of the source code
-COPY --chown=app:app . /app
+COPY --chown=app:app . .
 
 CMD ["/bin/bash"]

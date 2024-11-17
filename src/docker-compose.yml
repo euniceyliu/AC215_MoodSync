@@ -10,15 +10,16 @@ services:
     image: test-image
     container_name: test-image-container
     volumes:
-      - ..:/app
+      - ../src:/app:delegated
       - coverage-volume:/coverage
+      - pip-cache:/home/app/.local
     depends_on:
       - chromadb
     command: ["tail", "-f", "/dev/null"]
     environment:
       - COVERAGE_FILE=/coverage/.coverage
-      - PYTHONPATH=/app/src
-    user: "1000:1000"  # Match the UID:GID from Dockerfile
+      - PYTHONPATH=/app
+    user: "1000:1000"
   
   chromadb:
     image: chromadb/chroma:0.5.5
@@ -34,3 +35,4 @@ services:
 
 volumes:
   coverage-volume:
+  pip-cache:
