@@ -23,12 +23,14 @@ jobs:
         sudo curl -L "https://github.com/docker/compose/releases/download/v2.5.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
         sudo chmod +x /usr/local/bin/docker-compose
 
+    - name: Create external Docker network
+      run: docker network create llm-rag-network
+
     - name: Build Docker image
       run: docker build -t test-image -f src/Dockerfile .
       
     - name: Run docker compose
       run: docker-compose -f src/docker-compose.yml up -d
-
 
     - name: Run tests inside the container
       run: |
