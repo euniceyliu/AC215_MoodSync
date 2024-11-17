@@ -2,21 +2,13 @@ FROM python:3.11-slim-bookworm
 
 ARG DEBIAN_PACKAGES="build-essential git screen vim"
 
-# Prevent apt from showing prompts
 ENV DEBIAN_FRONTEND=noninteractive
-
-# Python wants UTF-8 locale
 ENV LANG=C.UTF-8
-
-# Tell pipenv where the shell is
 ENV PYENV_SHELL=/bin/bash
-
 ENV GOOGLE_APPLICATION_CREDENTIALS=secrets/llm-service-account.json
-
-# Tell Python to disable buffering so we don't lose any logs
 ENV PYTHONUNBUFFERED=1
 
-# Create app user first so we get consistent UID/GID
+# Create app user
 RUN useradd -ms /bin/bash app -d /home/app -u 1000 -p "$(openssl passwd -1 Passw0rd)"
 
 # Install system dependencies
@@ -30,11 +22,9 @@ RUN set -ex; \
     pip install --no-cache-dir --upgrade pip && \
     pip install pipenv && \
     mkdir -p /app && \
-    mkdir -p /coverage && \
+    mkdir -p /app/.coverage-reports && \
     chown -R app:app /app && \
-    chown -R app:app /coverage && \
-    chmod -R 777 /app && \
-    chmod -R 777 /coverage
+    chmod -R 777 /app
 
 # Create a directory for python packages
 RUN mkdir -p /home/app/.local && \

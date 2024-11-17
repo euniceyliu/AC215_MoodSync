@@ -31,13 +31,11 @@ jobs:
       - name: Create external Docker network
         run: docker network create llm-rag-network || true
 
-      - name: Setup test environment and coverage directory
+      - name: Setup test environment
         run: |
+          mkdir -p src/.coverage-reports
+          chmod -R 777 src/.coverage-reports
           cd src
-          mkdir -p .coverage-reports
-          sudo chown -R 1000:1000 .coverage-reports
-          sudo chmod -R 777 .coverage-reports
-          
           touch Pipfile
           chmod 666 Pipfile
           pipenv install pytest pytest-cov chromadb langchain openai google-cloud-aiplatform --dev
@@ -67,33 +65,28 @@ jobs:
           cat << 'EOF' > run_tests.sh
           #!/bin/bash
           cd /app
+          
+          # Ensure coverage directory exists and has correct permissions
           mkdir -p .coverage-reports/htmlcov
+          chmod -R 777 .coverage-reports
+          
+          # Run tests with explicit paths
+          PYTHONPATH=/app \
           COVERAGE_FILE=/app/.coverage-reports/.coverage \
           pipenv run pytest \
-            --cov=src \
+            --cov=. \
             --cov-report=term-missing \
-            --cov-report=xml:.coverage-reports/coverage.xml \
-            --cov-report=html:.coverage-reports/htmlcov \
+            --cov-report=xml:/app/.coverage-reports/coverage.xml \
+            --cov-report=html:/app/.coverage-reports/htmlcov \
             tests/ -v
           
-          # Ensure files are accessible outside container
-          chmod -R 777 .coverage-reports
+          # Ensure all files are accessible
+          chmod -R 777 /app/.coverage-reports
           EOF
           
           chmod +x run_tests.sh
-          
-          # Copy and execute the script in the container
           docker cp run_tests.sh $CONTAINER_NAME:/app/
           docker exec $CONTAINER_NAME bash -c "/app/run_tests.sh"
-          
-          # Debug: Show coverage files
-          echo "Coverage directory contents:"
-          ls -la .coverage-reports/
-          
-          if [ -d ".coverage-reports/htmlcov" ]; then
-            echo "HTML coverage report contents:"
-            ls -la .coverage-reports/htmlcov/
-          fi
 
       - name: Upload Coverage Report (XML)
         if: always()
@@ -101,7 +94,7 @@ jobs:
         with:
           name: coverage-report-xml
           path: src/.coverage-reports/coverage.xml
-          if-no-files-found: warn
+          if-no-files-found: error
 
       - name: Upload Coverage Report (HTML)
         if: always()
@@ -109,7 +102,7 @@ jobs:
         with:
           name: coverage-report-html
           path: src/.coverage-reports/htmlcov
-          if-no-files-found: warn
+          if-no-files-found: error
 
       - name: Cleanup
         if: always()
