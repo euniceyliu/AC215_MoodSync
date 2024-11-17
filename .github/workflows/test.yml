@@ -38,18 +38,25 @@ jobs:
       run: |
         CONTAINER_NAME=$(docker-compose -f src/docker-compose.yml ps -q test-image)
         echo "Container ID: $CONTAINER_NAME"
+        
+        # Install dependencies and verify installation
+        docker exec $CONTAINER_NAME bash -c "cd /app && pipenv install --dev"
+        docker exec $CONTAINER_NAME bash -c "cd /app && pipenv run pip list"
+        
         # Create coverage directory and set permissions
         docker exec $CONTAINER_NAME bash -c "mkdir -p /app/coverage && chmod 777 /app/coverage"
-        # Run tests
+        
+        # Run tests with explicit path to pytest
         docker exec \
           -e COVERAGE_FILE=/app/coverage/.coverage \
           -e COVERAGE_RCFILE=/app/coverage/.coveragerc \
           $CONTAINER_NAME bash -c \
-          'cd /app && pipenv run pytest \
+          'cd /app && pipenv run python -m pytest \
           --cov-config=/app/coverage/.coveragerc \
           --cov=src \
           --cov-report=xml:/app/coverage/coverage.xml \
           --cov-report=html:/app/coverage/html'
+        
         # Fix permissions after test run
         docker exec $CONTAINER_NAME bash -c "chown -R $(id -u):$(id -g) /app/coverage"
 
