@@ -31,9 +31,14 @@ jobs:
       - name: Create external Docker network
         run: docker network create llm-rag-network || true
 
-      - name: Setup test environment
+      - name: Setup test environment and coverage directory
         run: |
           cd src
+          # Create and set permissions for coverage directory before Docker runs
+          mkdir -p coverage
+          sudo chown 1000:1000 coverage
+          sudo chmod 777 coverage
+          
           touch Pipfile
           chmod 666 Pipfile
           pipenv install pytest pytest-cov chromadb langchain openai google-cloud-aiplatform --dev
@@ -53,12 +58,6 @@ jobs:
           docker ps
           sleep 15
 
-      - name: Create coverage directory
-        run: |
-          cd src
-          mkdir -p coverage
-          sudo chmod -R 777 coverage
-
       - name: Run tests with coverage
         run: |
           cd src
@@ -69,8 +68,7 @@ jobs:
             -e PYTHONPATH=/app \
             $CONTAINER_NAME \
             bash -c "cd /app && \
-            mkdir -p /app/coverage && \
-            chmod -R 777 /app/coverage && \
+            COVERAGE_FILE=/app/coverage/.coverage \
             pipenv run pytest \
               --cov=src \
               --cov-report=term-missing \
