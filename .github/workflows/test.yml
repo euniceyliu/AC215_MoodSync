@@ -34,10 +34,9 @@ jobs:
       - name: Setup test environment and coverage directory
         run: |
           cd src
-          # Create and set permissions for coverage directory before Docker runs
-          mkdir -p coverage
-          sudo chown 1000:1000 coverage
-          sudo chmod 777 coverage
+          mkdir -p .coverage-reports
+          sudo chown -R 1000:1000 .coverage-reports
+          sudo chmod -R 777 .coverage-reports
           
           touch Pipfile
           chmod 666 Pipfile
@@ -64,32 +63,52 @@ jobs:
           CONTAINER_NAME=$(docker-compose ps -q test-image)
           echo "Container ID: $CONTAINER_NAME"
           
-          docker exec \
-            -e PYTHONPATH=/app \
-            $CONTAINER_NAME \
-            bash -c "cd /app && \
-            COVERAGE_FILE=/app/coverage/.coverage \
-            pipenv run pytest \
-              --cov=src \
-              --cov-report=term-missing \
-              --cov-report=xml:/app/coverage/coverage.xml \
-              --cov-report=html:/app/coverage/htmlcov \
-              tests/ -v"
+          # Create a shell script to run the tests
+          cat << 'EOF' > run_tests.sh
+          #!/bin/bash
+          cd /app
+          mkdir -p .coverage-reports/htmlcov
+          COVERAGE_FILE=/app/.coverage-reports/.coverage \
+          pipenv run pytest \
+            --cov=src \
+            --cov-report=term-missing \
+            --cov-report=xml:.coverage-reports/coverage.xml \
+            --cov-report=html:.coverage-reports/htmlcov \
+            tests/ -v
+          
+          # Ensure files are accessible outside container
+          chmod -R 777 .coverage-reports
+          EOF
+          
+          chmod +x run_tests.sh
+          
+          # Copy and execute the script in the container
+          docker cp run_tests.sh $CONTAINER_NAME:/app/
+          docker exec $CONTAINER_NAME bash -c "/app/run_tests.sh"
+          
+          # Debug: Show coverage files
+          echo "Coverage directory contents:"
+          ls -la .coverage-reports/
+          
+          if [ -d ".coverage-reports/htmlcov" ]; then
+            echo "HTML coverage report contents:"
+            ls -la .coverage-reports/htmlcov/
+          fi
 
       - name: Upload Coverage Report (XML)
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report-xml
-          path: src/coverage/coverage.xml
+          path: src/.coverage-reports/coverage.xml
           if-no-files-found: warn
 
       - name: Upload Coverage Report (HTML)
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report-html
-          path: src/coverage/htmlcov
+          path: src/.coverage-reports/htmlcov
           if-no-files-found: warn
 
       - name: Cleanup
