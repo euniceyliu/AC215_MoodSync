@@ -41,7 +41,7 @@ USER app
 WORKDIR /app
 
 # Install python packages
-COPY --chown=app:app Pipfile Pipfile.lock /app/
+COPY --chown=app:app src/Pipfile src/Pipfile.lock /app/
 
 RUN pipenv sync
 
