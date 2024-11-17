@@ -1,5 +1,5 @@
 # Use the official Debian-hosted Python image
-FROM python:3.11-slim-buster
+FROM python:3.11-slim-bookworm
 
 ARG DEBIAN_PACKAGES="build-essential git screen vim"
 
@@ -49,3 +49,4 @@ RUN pipenv sync
 # layers when we change a line of code.
 COPY --chown=app:app . /app
 
+CMD ["/bin/bash"]

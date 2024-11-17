@@ -75,7 +75,7 @@ generative_model = GenerativeModel(
 
 
 MODEL_ENDPOINT = (
-    "projects/473040659708/locations/us-central1"
+    "projects/473040659708/locations/us-central1/"
     "endpoints/1976395240671543296"
 )
 finetuned_model = GenerativeModel(

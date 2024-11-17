@@ -27,6 +27,7 @@ langchain = "*"
 agent_tools = "*"
 gcsfs = "*"
 langchain-community = "*"
+importlib-metadata = ">=5.0"
 
 [requires]
 python_version = "3.11"
