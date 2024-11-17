@@ -10,7 +10,7 @@ services:
     image: test-image
     container_name: test-image-container
     volumes:
-      - ../src:/app:delegated
+      - .:/app:delegated
       - ./.coverage-reports:/app/.coverage-reports
       - pip-cache:/home/app/.local
     depends_on:
