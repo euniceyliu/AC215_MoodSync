@@ -34,6 +34,7 @@ jobs:
 
     - name: Run tests
       run: |
+        docker exec -it test-image-container \
         pipenv run pytest --cov=src \
         --cov-report=xml:/app/coverage/coverage.xml \
         --cov-report=html:/app/coverage/html
