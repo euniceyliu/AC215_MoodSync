@@ -46,10 +46,10 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: coverage-report-xml
-        path: coverage/coverage.xml
+        path: ${{ github.workspace }}/coverage/coverage.xml
 
     - name: Upload Coverage Report (HTML)
       uses: actions/upload-artifact@v3
       with:
         name: coverage-report-html
-        path: coverage/html
+        path: ${{ github.workspace }}/coverage/html
