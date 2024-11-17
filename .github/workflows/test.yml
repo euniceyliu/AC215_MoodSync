@@ -9,6 +9,9 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v2
 
+    - name: Set permissions for coverage directory
+      run: mkdir -p ${{ github.workspace }}/coverage && chmod -R 777 ${{ github.workspace }}/coverage
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
       
@@ -23,11 +26,6 @@ jobs:
     - name: Build Docker image
       run: docker build -t test-image -f src/Dockerfile .
       
-    - name: Prepare coverage directory
-      run: |
-        mkdir -p ${{ github.workspace }}/coverage
-        sudo chmod -R 777 ${{ github.workspace }}/coverage
-
     - name: Run docker compose
       run: |
         docker-compose -f src/docker-compose.yml up -d
@@ -38,50 +36,24 @@ jobs:
       run: |
         CONTAINER_NAME=$(docker-compose -f src/docker-compose.yml ps -q test-image)
         echo "Container ID: $CONTAINER_NAME"
+        docker exec $CONTAINER_NAME pipenv run pytest --cov=src \
+        --cov-report=xml:/app/coverage/coverage.xml \
+        --cov-report=html:/app/coverage/html
         
-        # Install dependencies and verify installation
-        docker exec $CONTAINER_NAME bash -c "cd /app && pipenv install --dev"
-        docker exec $CONTAINER_NAME bash -c "cd /app && pipenv run pip list"
-        
-        # Create coverage directory and set permissions
-        docker exec $CONTAINER_NAME bash -c "mkdir -p /app/coverage && chmod 777 /app/coverage"
-        
-        # Run tests with explicit path to pytest
-        docker exec \
-          -e COVERAGE_FILE=/app/coverage/.coverage \
-          -e COVERAGE_RCFILE=/app/coverage/.coveragerc \
-          $CONTAINER_NAME bash -c \
-          'cd /app && pipenv run python -m pytest \
-          --cov-config=/app/coverage/.coveragerc \
-          --cov=src \
-          --cov-report=xml:/app/coverage/coverage.xml \
-          --cov-report=html:/app/coverage/html'
-        
-        # Fix permissions after test run
-        docker exec $CONTAINER_NAME bash -c "chown -R $(id -u):$(id -g) /app/coverage"
-
-    - name: Create coverage config
+    - name: List container contents
       run: |
         CONTAINER_NAME=$(docker-compose -f src/docker-compose.yml ps -q test-image)
-        echo '[run]
-        data_file = /app/coverage/.coverage
-        parallel = True
-        concurrency = multiprocessing
-        source = src
-        
-        [report]
-        exclude_lines =
-            pragma: no cover
-            def __repr__
-            raise NotImplementedError
-            if __name__ == .__main__.:
-            pass
-        
-        [html]
-        directory = /app/coverage/html
-        
-        [xml]
-        output = /app/coverage/coverage.xml' | docker exec -i $CONTAINER_NAME tee /app/coverage/.coveragerc
+        echo "Listing /app/coverage in container..."
+        docker exec $CONTAINER_NAME ls -la /app/coverage
+
+    - name: Copy coverage reports from container
+      run: |
+        CONTAINER_NAME=$(docker-compose -f src/docker-compose.yml ps -q test-image)
+        echo "Container name: $CONTAINER_NAME"
+        echo "Copying coverage reports..."
+        docker cp $CONTAINER_NAME:/app/coverage/. ${{ github.workspace }}/coverage/
+        echo "Listing copied files..."
+        ls -la ${{ github.workspace }}/coverage
 
     - name: Upload Coverage Report (XML)
       uses: actions/upload-artifact@v3

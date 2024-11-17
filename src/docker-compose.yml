@@ -1,25 +1,16 @@
-version: '3.8'
-
 networks:
     default:
         name: llm-rag-network
         external: true
-
 services:
     test-image:
         image: test-image
         container_name: test-image-container
+        volumes:
+            - ../src:/app
         depends_on:
             - chromadb
-        command: ["tail", "-f", "/dev/null"]
-        volumes:
-            - .:/app:delegated
-            - ./coverage:/app/coverage:z
-        environment:
-            - COVERAGE_FILE=/app/coverage/.coverage
-            - PYTHONPATH=/app/src
-        user: root  # Change this to root temporarily for test execution
-    
+        command: ["tail", "-f", "/dev/null"] 
     chromadb:
         image: chromadb/chroma:0.5.5
         container_name: llm-rag-chromadb
@@ -30,4 +21,4 @@ services:
         environment:
             - IS_PERSISTENT=TRUE
             - ANONYMIZED_TELEMETRY=FALSE
-            - CHROMA_SERVER_CORS_ALLOW_ORIGINS=["*"]
+            - CHROMA_SERVER_CORS_ALLOW_ORIGINS=["*"] # This is not recommended for production environments.
