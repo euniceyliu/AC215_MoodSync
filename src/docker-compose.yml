@@ -12,13 +12,14 @@ services:
     volumes:
       - .:/app:delegated
       - ./.coverage-reports:/app/.coverage-reports
+      - ./.pytest_cache:/app/.pytest_cache
       - pip-cache:/home/app/.local
     depends_on:
       - chromadb
     command: ["tail", "-f", "/dev/null"]
     environment:
       - PYTHONPATH=/app
-    user: "1000:1000"
+    user: "root"  # Changed to root for permission handling
   
   chromadb:
     image: chromadb/chroma:0.5.5

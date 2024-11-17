@@ -33,9 +33,11 @@ jobs:
 
       - name: Setup test environment
         run: |
-          mkdir -p src/.coverage-reports
-          chmod -R 777 src/.coverage-reports
           cd src
+          mkdir -p .coverage-reports .pytest_cache
+          sudo chown -R 1000:1000 .coverage-reports .pytest_cache
+          sudo chmod -R 777 .coverage-reports .pytest_cache
+          
           touch Pipfile
           chmod 666 Pipfile
           pipenv install pytest pytest-cov chromadb langchain openai google-cloud-aiplatform --dev
@@ -66,9 +68,10 @@ jobs:
           #!/bin/bash
           cd /app
           
-          # Ensure coverage directory exists and has correct permissions
-          mkdir -p .coverage-reports/htmlcov
-          chmod -R 777 .coverage-reports
+          # Ensure directories exist with correct permissions
+          mkdir -p .coverage-reports/htmlcov .pytest_cache
+          chown -R app:app .coverage-reports .pytest_cache
+          chmod -R 777 .coverage-reports .pytest_cache
           
           # Run tests with explicit paths
           PYTHONPATH=/app \
@@ -80,13 +83,20 @@ jobs:
             --cov-report=html:/app/.coverage-reports/htmlcov \
             tests/ -v
           
-          # Ensure all files are accessible
-          chmod -R 777 /app/.coverage-reports
+          # Fix permissions for generated files
+          find .coverage-reports -type d -exec chmod 777 {} +
+          find .coverage-reports -type f -exec chmod 666 {} +
           EOF
           
           chmod +x run_tests.sh
           docker cp run_tests.sh $CONTAINER_NAME:/app/
-          docker exec $CONTAINER_NAME bash -c "/app/run_tests.sh"
+          docker exec --user root $CONTAINER_NAME bash -c "/app/run_tests.sh"
+
+      - name: Fix permissions
+        run: |
+          cd src
+          sudo chown -R $(id -u):$(id -g) .coverage-reports
+          sudo chmod -R 777 .coverage-reports
 
       - name: Upload Coverage Report (XML)
         if: always()
