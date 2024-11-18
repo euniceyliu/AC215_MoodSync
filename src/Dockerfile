@@ -1,17 +1,25 @@
+# Use the official Debian-hosted Python image
 FROM python:3.11-slim-bookworm
 
 ARG DEBIAN_PACKAGES="build-essential git screen vim"
 
+# Prevent apt from showing prompts
 ENV DEBIAN_FRONTEND=noninteractive
+
+# Python wants UTF-8 locale
 ENV LANG=C.UTF-8
+
+# Tell pipenv where the shell is. This allows us to use "pipenv shell" as a
+# container entry point.
 ENV PYENV_SHELL=/bin/bash
+
 ENV GOOGLE_APPLICATION_CREDENTIALS=secrets/llm-service-account.json
+
+# Tell Python to disable buffering so we don't lose any logs.
 ENV PYTHONUNBUFFERED=1
 
-# Create app user
-RUN useradd -ms /bin/bash app -d /home/app -u 1000 -p "$(openssl passwd -1 Passw0rd)"
-
-# Install system dependencies
+# Ensure we have an up to date baseline, install dependencies and
+# create a user so we don't run the app as root
 RUN set -ex; \
     for i in $(seq 1 8); do mkdir -p "/usr/share/man/man${i}"; done && \
     apt-get update && \
@@ -21,27 +29,24 @@ RUN set -ex; \
     rm -rf /var/lib/apt/lists/* && \
     pip install --no-cache-dir --upgrade pip && \
     pip install pipenv && \
+    useradd -ms /bin/bash app -d /home/app -u 1000 -p "$(openssl passwd -1 Passw0rd)" && \
     mkdir -p /app && \
-    mkdir -p /app/.coverage-reports && \
-    chown -R app:app /app && \
-    chmod -R 777 /app
+    mkdir -p /persistent && \
+    chown app:app /persistent && \
+    chown app:app /app
 
-# Create a directory for python packages
-RUN mkdir -p /home/app/.local && \
-    chown -R app:app /home/app/.local
 
-# Switch to the app user
+# Switch to the new user
 USER app
 WORKDIR /app
 
-# Copy Pipfile and install dependencies
-COPY --chown=app:app Pipfile Pipfile.lock ./
+# Install python packages
+COPY --chown=app:app src/Pipfile src/Pipfile.lock /app/
 
-# Install all dependencies globally
-RUN pip install --user pytest pytest-cov pandas chromadb langchain openai google-cloud-aiplatform && \
-    pipenv install --deploy --system --dev
+RUN pipenv sync
 
-# Add the rest of the source code
-COPY --chown=app:app . .
+# Add the rest of the source code. This is done last so we don't invalidate all
+# layers when we change a line of code.
+COPY --chown=app:app . /app
 
 CMD ["/bin/bash"]
