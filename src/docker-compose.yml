@@ -1,39 +1,24 @@
-version: '3.8'
-
 networks:
-  default:
-    name: llm-rag-network
-    external: true
-
+    default:
+        name: llm-rag-network
+        external: true
 services:
-  test-image:
-    image: test-image
-    container_name: test-image-container
-    volumes:
-      - .:/app:delegated
-      - ./.coverage-reports:/app/.coverage-reports:rw
-      - ./.pytest_cache:/app/.pytest_cache:rw
-      - ./coverage:/app/coverage:rw  # New volume for coverage database
-      - pip-cache:/home/app/.local
-    depends_on:
-      - chromadb
-    command: ["tail", "-f", "/dev/null"]
-    environment:
-      - PYTHONPATH=/app
-      - COVERAGE_FILE=/app/coverage/.coverage  # Set specific coverage file location
-    user: "app"
-  
-  chromadb:
-    image: chromadb/chroma:0.5.5
-    container_name: llm-rag-chromadb
-    ports:
-      - 8000:8000
-    volumes:
-      - ./docker-volumes/chromadb:/chroma/chroma
-    environment:
-      - IS_PERSISTENT=TRUE
-      - ANONYMIZED_TELEMETRY=FALSE
-      - CHROMA_SERVER_CORS_ALLOW_ORIGINS=["*"]
-
-volumes:
-  pip-cache:
+    test-image:
+        image: test-image
+        container_name: test-image-container
+        volumes:
+            - ../src:/app
+        depends_on:
+            - chromadb
+        command: ["tail", "-f", "/dev/null"] 
+    chromadb:
+        image: chromadb/chroma:0.5.5
+        container_name: llm-rag-chromadb
+        ports:
+            - 8000:8000
+        volumes:
+            - ./docker-volumes/chromadb:/chroma/chroma
+        environment:
+            - IS_PERSISTENT=TRUE
+            - ANONYMIZED_TELEMETRY=FALSE
+            - CHROMA_SERVER_CORS_ALLOW_ORIGINS=["*"] # This is not recommended for production environments.
