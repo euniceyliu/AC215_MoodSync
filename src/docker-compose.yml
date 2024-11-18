@@ -13,13 +13,15 @@ services:
       - .:/app:delegated
       - ./.coverage-reports:/app/.coverage-reports:rw
       - ./.pytest_cache:/app/.pytest_cache:rw
+      - ./coverage:/app/coverage:rw  # New volume for coverage database
       - pip-cache:/home/app/.local
     depends_on:
       - chromadb
     command: ["tail", "-f", "/dev/null"]
     environment:
       - PYTHONPATH=/app
-    user: "root"
+      - COVERAGE_FILE=/app/coverage/.coverage  # Set specific coverage file location
+    user: "app"
   
   chromadb:
     image: chromadb/chroma:0.5.5

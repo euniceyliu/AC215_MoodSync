@@ -34,9 +34,9 @@ jobs:
       - name: Setup test environment
         run: |
           cd src
-          mkdir -p .coverage-reports/htmlcov .pytest_cache
-          sudo chown -R 1000:1000 .coverage-reports .pytest_cache
-          sudo chmod -R 777 .coverage-reports .pytest_cache
+          mkdir -p .coverage-reports/htmlcov .pytest_cache coverage
+          sudo chown -R 1000:1000 .coverage-reports .pytest_cache coverage
+          sudo chmod -R 777 .coverage-reports .pytest_cache coverage
           
           touch Pipfile
           chmod 666 Pipfile
@@ -70,14 +70,12 @@ jobs:
           
           cd /app
           
-          # Ensure directories exist with correct permissions
-          mkdir -p .coverage-reports/htmlcov .pytest_cache
-          chmod -R 777 .coverage-reports .pytest_cache
-          
-          # Verify Python environment
-          python -m pip list
+          # Create and set permissions for coverage directory
+          mkdir -p coverage
+          chmod -R 777 coverage
           
           # Run tests with coverage
+          COVERAGE_FILE=/app/coverage/.coverage \
           PYTHONPATH=/app \
           python -m pytest \
             --cov=dataset-creation \
@@ -86,18 +84,17 @@ jobs:
             --cov-report=html:.coverage-reports/htmlcov \
             tests/ -v
           
-          # Verify coverage files exist
-          ls -la .coverage-reports/
-          ls -la .coverage-reports/htmlcov/
+          # Move coverage file to reports directory
+          cp coverage/.coverage .coverage-reports/
           
           # Fix permissions for generated files
-          chmod -R 777 .coverage-reports
+          chmod -R 777 .coverage-reports coverage
           EOF
           
           chmod +x run_tests.sh
           docker cp run_tests.sh $CONTAINER_NAME:/app/
           
-          # Install dependencies and run tests
+          # Run tests
           docker exec --user app $CONTAINER_NAME bash -c "/app/run_tests.sh"
 
       - name: Upload Coverage Report (XML)
