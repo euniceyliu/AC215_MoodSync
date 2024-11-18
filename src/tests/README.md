@@ -6,16 +6,10 @@ the pytest package in order to simulate these API requests and test the function
 
 ## Instructions to run locally
 These tests are integrated into GitHub Actions to run automatically after a push to the milestone4 branch. The GitHub Actions workflow also automatically uploads the coverage reports as artifacts after the workflow run. To run these tests locally, 
-1. Navigate into the ``src`` folder.
-2. Change the "install Python packages" section of the Dockerfile to:
-   
-``COPY --chown=app:app Pipfile Pipfile.lock /app/``
-
-3. In the Terminal, run
-   ``docker build -t test-image .``
-
-4. Run the container using ``docker run -it test-image sh``
-5. Run the tests using ``pipenv run pytest -v``.
+1. From the root of the repo, run
+ ``docker build -t test-image -f src/Dockerfile .``.
+2. Then run the container using ``docker run -it test-image sh``
+3. Run the tests using ``pipenv run pytest -v``.
 
 ## Test Documentation
 Here is documentation of the implemented test functions:
