@@ -163,8 +163,7 @@ class SemanticChunker(BaseDocumentTransformer):
             return (
                 cast(
                     float,
-                    np.mean(distances)
-                    + self.breakpoint_threshold_amount * np.std(distances),
+                    np.mean(distances) + self.breakpoint_threshold_amount * np.std(distances),
                 ),
                 distances,
             )
@@ -255,8 +254,7 @@ class SemanticChunker(BaseDocumentTransformer):
             return single_sentences_list
         # similarly, the following np.gradient would fail
         if (
-            self.breakpoint_threshold_type == "gradient"
-            and len(single_sentences_list) == 2
+            self.breakpoint_threshold_type == "gradient" and len(single_sentences_list) == 2
         ):
             return single_sentences_list
         distances, sentences = self._calculate_sentence_distances(
@@ -288,7 +286,7 @@ class SemanticChunker(BaseDocumentTransformer):
             end_index = index
 
             # Slice the sentence_dicts from start index to the end index
-            group = sentences[start_index : end_index + 1]
+            group = sentences[start_index: end_index + 1]
             combined_text = " ".join([d["sentence"] for d in group])
             chunks.append(combined_text)
 

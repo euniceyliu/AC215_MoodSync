@@ -31,9 +31,6 @@ CHROMADB_HOST = "llm-rag-chromadb-chat"
 CHROMADB_PORT = 8000
 vertexai.init(project=GCP_PROJECT, location=GCP_LOCATION)
 
-
-
-
 SYSTEM_INSTRUCTION = """
 You are a knowledgeable music expert who can generate personalized playlists.
 Consider the user's mood, interests, and personal music preferences to craft
@@ -69,11 +66,6 @@ generation_config = {
 }
 
 
-generative_model = GenerativeModel(
-    GENERATIVE_MODEL, system_instruction=[SYSTEM_INSTRUCTION]
-)
-
-
 MODEL_ENDPOINT = (
     "projects/473040659708/locations/us-central1/"
     "endpoints/1976395240671543296"
@@ -99,7 +91,6 @@ def generate_query_embedding(query):
     return embeddings[0].values
 
 
-
 def load_text_embeddings(df, collection, batch_size=500):
     """Load text embeddings into ChromaDB with preserved metadata"""
     df["id"] = df.index.astype(str)
@@ -110,7 +101,7 @@ def load_text_embeddings(df, collection, batch_size=500):
 
     total_inserted = 0
     for i in range(0, df.shape[0], batch_size):
-        batch = df.iloc[i : i + batch_size].copy().reset_index(drop=True)
+        batch = df.iloc[i: i + batch_size].copy().reset_index(drop=True)
 
         ids = batch["id"].tolist()
         documents = batch["chunk"].tolist()
@@ -248,6 +239,9 @@ def query(method="semantic-split-full-lyrics"):
 def chat(method="semantic-split-full-lyrics"):
     print("chat()")
 
+    generative_model = GenerativeModel(
+        GENERATIVE_MODEL, system_instruction=[SYSTEM_INSTRUCTION]
+    )
     # Connect to chroma DB
     client = chromadb.HttpClient(host=CHROMADB_HOST, port=CHROMADB_PORT)
     # Get a collection object from an existing collection
@@ -281,11 +275,14 @@ def chat(method="semantic-split-full-lyrics"):
     )
     generated_text = response.text
     print("LLM Response:", generated_text)
+    return generated_text
 
 
 def agent(method="semantic-split-full-lyrics"):
     print("agent()")
-
+    generative_model = GenerativeModel(
+        GENERATIVE_MODEL, system_instruction=[SYSTEM_INSTRUCTION]
+    )
     # Connect to chroma DB
     client = chromadb.HttpClient(host=CHROMADB_HOST, port=CHROMADB_PORT)
     # Get a collection object from an existing collection

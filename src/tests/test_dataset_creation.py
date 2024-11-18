@@ -4,15 +4,7 @@ import pandas as pd
 import sys
 from pathlib import Path
 
-sys.path.insert(
-    0, 
-    str(
-        Path(__file__)
-        .resolve()
-        .parent
-        .parent / "dataset-creation"
-    )
-)
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "dataset-creation"))
 
 from cli import generate_data, generate_data_llm, prepare, upload
 
@@ -34,9 +26,7 @@ class TestGenerateData(unittest.TestCase):
             mock_response = MagicMock()
             mock_response.text = "Generated content response"
             mock_generative_model_instance = mock_generative_model.return_value
-            mock_generative_model_instance.generate_content.return_value = (
-                mock_response
-            )
+            mock_generative_model_instance.generate_content.return_value = mock_response
             mock_generative_model_instance.generation_config = {
                 "max_output_tokens": 5000,
                 "temperature": 1.85,
@@ -47,26 +37,20 @@ class TestGenerateData(unittest.TestCase):
             generate_data("dummy_file_path.csv")
 
             # Assert generate_content was called
-            mock_generate_content = (
-                mock_generative_model_instance.generate_content
-            )
+            mock_generate_content = mock_generative_model_instance.generate_content
             mock_generate_content.assert_called_once()
 
             # Check if file writing was called with expected content
             mock_open.assert_called_once_with("prompt_playlist_data.txt", "a")
 
     @patch("cli.GenerativeModel")  # Mock the GenerativeModel class in cli2
-    @patch(
-        "builtins.open", create=True
-    )  # Mock the open function to avoid file I/O
+    @patch("builtins.open", create=True)  # Mock the open function to avoid file I/O
     def test_generate_data_llm(self, mock_open, mock_generative_model):
         "Tests functionality of generate_data_llm function"
         mock_response = MagicMock()
         mock_response.text = "Generated content response"
         mock_generative_model_instance = mock_generative_model.return_value
-        mock_generative_model_instance.generate_content.return_value = (
-            mock_response
-        )
+        mock_generative_model_instance.generate_content.return_value = mock_response
         mock_generative_model_instance.generation_config = {
             "max_output_tokens": 5000,
             "temperature": 1.85,
@@ -87,15 +71,9 @@ class TestGenerateData(unittest.TestCase):
 
     @patch("builtins.open", create=True)  # Mock open function
     @patch("cli.train_test_split")  # Mock train_test_split
-    @patch(
-        "cli.pd.DataFrame.to_csv"
-    )  # Mock DataFrame.to_csv to avoid file I/O
-    @patch(
-        "cli.pd.DataFrame.to_json"
-    )  # Mock DataFrame.to_json to avoid file I/O
-    def test_prepare(
-        self, mock_to_json, mock_to_csv, mock_train_test_split, mock_open
-    ):
+    @patch("cli.pd.DataFrame.to_csv")  # Mock DataFrame.to_csv to avoid file I/O
+    @patch("cli.pd.DataFrame.to_json")  # Mock DataFrame.to_json to avoid file I/O
+    def test_prepare(self, mock_to_json, mock_to_csv, mock_train_test_split, mock_open):
         """Tests functionality of prepare function"""
         mock_text = """```json
         [

@@ -31,7 +31,6 @@ CHROMADB_HOST = "llm-rag-chromadb"
 CHROMADB_PORT = 8000
 vertexai.init(project=GCP_PROJECT, location=GCP_LOCATION)
 
-embedding_model = TextEmbeddingModel.from_pretrained(EMBEDDING_MODEL)
 
 generation_config = {
     "max_output_tokens": 8192,
@@ -41,6 +40,7 @@ generation_config = {
 
 
 def generate_query_embedding(query):
+    embedding_model = TextEmbeddingModel.from_pretrained(EMBEDDING_MODEL)
     query_embedding_inputs = [
         TextEmbeddingInput(task_type="RETRIEVAL_DOCUMENT", text=query)
     ]
@@ -60,13 +60,14 @@ def generate_text_embeddings(
 ):
     """Generate embeddings for text chunks,
     trimming those that exceed token limits."""
+    embedding_model = TextEmbeddingModel.from_pretrained(EMBEDDING_MODEL)
     all_embeddings = []
     MAX_CHARS = (
         60000  # Approximate character limit corresponding to 20k tokens
     )
 
     for i in range(0, len(chunks), batch_size):
-        batch = chunks[i : i + batch_size]
+        batch = chunks[i: i + batch_size]
 
         # Trim any chunks that are too long
         processed_batch = [
@@ -119,7 +120,7 @@ def load_text_embeddings(df, collection, batch_size=500):
 
     total_inserted = 0
     for i in range(0, df.shape[0], batch_size):
-        batch = df.iloc[i : i + batch_size].copy().reset_index(drop=True)
+        batch = df.iloc[i: i + batch_size].copy().reset_index(drop=True)
 
         ids = batch["id"].tolist()
         documents = batch["chunk"].tolist()
