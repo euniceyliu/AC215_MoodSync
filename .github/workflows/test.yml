@@ -40,7 +40,7 @@ jobs:
           
           touch Pipfile
           chmod 666 Pipfile
-          pipenv install pytest pytest-cov chromadb langchain openai google-cloud-aiplatform --dev
+          pipenv install pytest pytest-cov pandas chromadb langchain openai google-cloud-aiplatform --dev
           pipenv lock
           chmod 666 Pipfile.lock
 
@@ -74,9 +74,12 @@ jobs:
           mkdir -p .coverage-reports/htmlcov .pytest_cache
           chmod -R 777 .coverage-reports .pytest_cache
           
+          # Verify Python environment
+          python -m pip list
+          
           # Run tests with coverage
           PYTHONPATH=/app \
-          pytest \
+          python -m pytest \
             --cov=dataset-creation \
             --cov-report=term-missing \
             --cov-report=xml:.coverage-reports/coverage.xml \
@@ -93,7 +96,9 @@ jobs:
           
           chmod +x run_tests.sh
           docker cp run_tests.sh $CONTAINER_NAME:/app/
-          docker exec $CONTAINER_NAME bash -c "pip install pytest pytest-cov && /app/run_tests.sh"
+          
+          # Install dependencies and run tests
+          docker exec --user app $CONTAINER_NAME bash -c "/app/run_tests.sh"
 
       - name: Upload Coverage Report (XML)
         if: always()

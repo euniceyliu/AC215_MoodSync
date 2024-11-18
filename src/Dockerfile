@@ -20,7 +20,7 @@ RUN set -ex; \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     pip install --no-cache-dir --upgrade pip && \
-    pip install pipenv pytest pytest-cov && \
+    pip install pipenv && \
     mkdir -p /app && \
     mkdir -p /app/.coverage-reports && \
     chown -R app:app /app && \
@@ -36,7 +36,10 @@ WORKDIR /app
 
 # Copy Pipfile and install dependencies
 COPY --chown=app:app Pipfile Pipfile.lock ./
-RUN pipenv install --deploy --system --dev
+
+# Install all dependencies globally
+RUN pip install --user pytest pytest-cov pandas chromadb langchain openai google-cloud-aiplatform && \
+    pipenv install --deploy --system --dev
 
 # Add the rest of the source code
 COPY --chown=app:app . .
