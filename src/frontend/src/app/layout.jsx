@@ -5,8 +5,8 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 
 export const metadata = {
-    title: 'My Awesome App',
-    description: 'An awesome description here',
+    title: 'MoodSync',
+    description: 'MoodSync Website',
 }
 
 export default function RootLayout({ children }) {
