@@ -10,33 +10,25 @@ const api = axios.create({
 });
 
 const DataService = {
-    /**
-     * Send a message to the backend and get the LLM response
-     * @param {string} message - The message to send to the LLM
-     * @returns {Promise<object>} - The response from the backend
-     */
-    chatWithLLM: async (message) => {
-      try {
-        console.log("Payload being sent:", message);
-        const response = await fetch(`${BASE_API_URL}/chat`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "text/plain",
-          },
-          body: message // Send user input
-        });
-  
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
-  
-        return await response.json();
-      } catch (error) {
-        console.error("Failed to send message to LLM:", error);
-        throw error;
-      }
-    },
-  };
+  Init: function () {
+    // Any application initialization logic comes here
+},
+  chatWithLLM: async function(message) {
+    try {
+      console.log("Sending message to backend:", message); // Debugging
+      const response = await api.post(BASE_API_URL + '/chat', message, {
+        headers: {
+          "Content-Type": "text", // Ensure the Content-Type matches backend expectations
+        },
+      });
+      return response.data; // Return the API response
+    } catch (error) {
+      console.error("Failed to send message to LLM:", error);
+      throw error; // Re-throw error to handle it in the caller
+    }
+  }
+}
+
   
 // const DataService = {
 //     Init: function () {

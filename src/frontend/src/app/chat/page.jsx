@@ -5,37 +5,19 @@ import { Music, Heart, Sparkles, Send, Play, Clock, Share2 } from 'lucide-react'
 import DataService from "../../services/DataService";
 
 export default function PlaylistPage() {
-    const [message, setMessage] = useState('');
     const [userInput, setUserInput] = useState(""); // Initialize userInput state
     const [isGenerating, setIsGenerating] = useState(false);
     const [playlist, setPlaylist] = useState(null);
     const [llmResponse, setLlmResponse] = useState(""); // LLM's response
-
-    // const handleSubmit = () => {
-    //     setIsGenerating(true);
-    //     // Simulate playlist generation
-    //     setTimeout(() => {
-    //         setPlaylist({
-    //             mood: message,
-    //             songs: [
-    //                 { title: "Don't Stop Believin'", artist: "Journey", duration: "4:11" },
-    //                 { title: "Girls Just Want to Have Fun", artist: "Cyndi Lauper", duration: "3:58" },
-    //                 { title: "Walking on Sunshine", artist: "Katrina & The Waves", duration: "3:43" },
-    //                 { title: "Take On Me", artist: "a-ha", duration: "3:46" },
-    //                 { title: "I Wanna Dance with Somebody", artist: "Whitney Houston", duration: "4:52" }
-    //             ]
-    //         });
-    //         setIsGenerating(false);
-    //     }, 1500);
-    // };
 
     const handleSubmit = async (e) => {
         e.preventDefault(); // Prevent page reload
         console.log("handleSubmit triggered with input:", userInput);
         try {
           const response = await DataService.chatWithLLM(userInput); // Call backend
-          setLlmResponse(response); // Update state with the response
+          setLlmResponse(response.response); // Update state with the response
           setUserInput(""); // Clear the input field
+          console.log(llmResponse)
         } catch (error) {
           console.error("Error chatting with LLM:", error);
         }
@@ -114,15 +96,14 @@ export default function PlaylistPage() {
                                 <h2 className="text-2xl font-semibold text-blue-900 mb-2">Your Mood Playlist</h2>
                                 <p className="text-blue-600">Curated just for you</p>
                             </div>
-                            
-                            {playlist ? (
+                            <div className="flex-1">
+                            <h3 className="text-blue-900 font-medium">LLM Response</h3>
+                            <p className="text-blue-600 text-sm">{llmResponse}</p> {/* Displays LLM Response */}
+                            </div>
+
+                            {/* {playlist ? ( */}
                                 <>    
-                                <div className="group flex items-center space-x-4 p-4 rounded-xl bg-blue-100 hover:bg-white hover:shadow-md transition-all duration-200">
-                                <div className="flex-1">
-                                  <h3 className="text-blue-900 font-medium">LLM Response</h3>
-                                  <p className="text-blue-600 text-sm">{llmResponse}</p>
-                                </div>
-                              </div>
+   
                                     {/* <div className="flex-1 space-y-3">
                                         {playlist.songs.map((song, index) => (
                                             <div
@@ -151,14 +132,14 @@ export default function PlaylistPage() {
                                     </div> */}
 
                                 </>
-                            ) : (
+                            {/* ) : (
                                 <div className="flex-1 flex items-center justify-center">
                                     <div className="text-center text-blue-400">
                                         <Music className="w-12 h-12 mx-auto mb-4" />
                                         <p>Share your mood to generate a playlist</p>
                                     </div>
                                 </div>
-                            )}
+                            )} */}
                         </div>
                     </div>
                 </div>
