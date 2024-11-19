@@ -1,6 +1,6 @@
 networks:
     default:
-        name: moodsync-app-network
+        name: llm-rag-network
         external: true
 services:
     llm-rag-cli:

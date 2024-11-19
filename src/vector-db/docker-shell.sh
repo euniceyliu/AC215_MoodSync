@@ -16,7 +16,7 @@ export GCP_ZONE="us-central1-a"
 
 
 # Create the network if we don't have it yet
-docker network inspect moodsync-app-network >/dev/null 2>&1 || docker network create moodsync-app-network
+docker network inspect llm-rag-network >/dev/null 2>&1 || docker network create llm-rag-network
 
 # Build the image based on the Dockerfile
 docker build -t $IMAGE_NAME -f Dockerfile .
