@@ -2,7 +2,7 @@
 
 set -e
 
-export IMAGE_NAME="app-building-crashcourse-frontend"
+export IMAGE_NAME="moodsync-frontend"
 
 # Build the image based on the Dockerfile
 docker build -t $IMAGE_NAME -f Dockerfile.dev .

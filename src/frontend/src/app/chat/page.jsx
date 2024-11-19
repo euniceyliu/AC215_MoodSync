@@ -2,29 +2,44 @@
 
 import { useState } from 'react';
 import { Music, Heart, Sparkles, Send, Play, Clock, Share2 } from 'lucide-react';
+import DataService from "../../services/DataService";
 
 export default function PlaylistPage() {
     const [message, setMessage] = useState('');
+    const [userInput, setUserInput] = useState(""); // Initialize userInput state
     const [isGenerating, setIsGenerating] = useState(false);
     const [playlist, setPlaylist] = useState(null);
+    const [llmResponse, setLlmResponse] = useState(""); // LLM's response
 
-    const handleSubmit = () => {
-        setIsGenerating(true);
-        // Simulate playlist generation
-        setTimeout(() => {
-            setPlaylist({
-                mood: message,
-                songs: [
-                    { title: "Don't Stop Believin'", artist: "Journey", duration: "4:11" },
-                    { title: "Girls Just Want to Have Fun", artist: "Cyndi Lauper", duration: "3:58" },
-                    { title: "Walking on Sunshine", artist: "Katrina & The Waves", duration: "3:43" },
-                    { title: "Take On Me", artist: "a-ha", duration: "3:46" },
-                    { title: "I Wanna Dance with Somebody", artist: "Whitney Houston", duration: "4:52" }
-                ]
-            });
-            setIsGenerating(false);
-        }, 1500);
-    };
+    // const handleSubmit = () => {
+    //     setIsGenerating(true);
+    //     // Simulate playlist generation
+    //     setTimeout(() => {
+    //         setPlaylist({
+    //             mood: message,
+    //             songs: [
+    //                 { title: "Don't Stop Believin'", artist: "Journey", duration: "4:11" },
+    //                 { title: "Girls Just Want to Have Fun", artist: "Cyndi Lauper", duration: "3:58" },
+    //                 { title: "Walking on Sunshine", artist: "Katrina & The Waves", duration: "3:43" },
+    //                 { title: "Take On Me", artist: "a-ha", duration: "3:46" },
+    //                 { title: "I Wanna Dance with Somebody", artist: "Whitney Houston", duration: "4:52" }
+    //             ]
+    //         });
+    //         setIsGenerating(false);
+    //     }, 1500);
+    // };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault(); // Prevent page reload
+        console.log("handleSubmit triggered with input:", userInput);
+        try {
+          const response = await DataService.chatWithLLM(userInput); // Call backend
+          setLlmResponse(response); // Update state with the response
+          setUserInput(""); // Clear the input field
+        } catch (error) {
+          console.error("Error chatting with LLM:", error);
+        }
+      };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 p-6">
@@ -69,8 +84,8 @@ export default function PlaylistPage() {
                             <div className="flex space-x-3">
                                 <input
                                     type="text"
-                                    value={message}
-                                    onChange={(e) => setMessage(e.target.value)}
+                                    value={userInput}
+                                    onChange={(e) => setUserInput(e.target.value)}
                                     placeholder="How are you feeling today?"
                                     className="flex-1 px-4 py-3 rounded-xl bg-blue-50 text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
                                 />
@@ -101,8 +116,14 @@ export default function PlaylistPage() {
                             </div>
                             
                             {playlist ? (
-                                <>
-                                    <div className="flex-1 space-y-3">
+                                <>    
+                                <div className="group flex items-center space-x-4 p-4 rounded-xl bg-blue-100 hover:bg-white hover:shadow-md transition-all duration-200">
+                                <div className="flex-1">
+                                  <h3 className="text-blue-900 font-medium">LLM Response</h3>
+                                  <p className="text-blue-600 text-sm">{llmResponse}</p>
+                                </div>
+                              </div>
+                                    {/* <div className="flex-1 space-y-3">
                                         {playlist.songs.map((song, index) => (
                                             <div
                                                 key={index}
@@ -127,7 +148,8 @@ export default function PlaylistPage() {
                                             <Music className="w-5 h-5" />
                                             <span>Play All</span>
                                         </button>
-                                    </div>
+                                    </div> */}
+
                                 </>
                             ) : (
                                 <div className="flex-1 flex items-center justify-center">
