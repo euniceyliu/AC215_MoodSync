@@ -158,15 +158,13 @@ export default function ChatPage({ searchParams }) {
 
     return (
         <div className={styles.container}>
-
             {/* Hero Section */}
             {!hasActiveChat && (
                 <section className={styles.hero}>
                     <div className={styles.heroContent}>
-                        <h1>Tell me how you're feeling </h1>
-                        <h1>and I'll create the perfect playlist for you</h1>
+                        <h1>Cheese Assistant 🌟</h1>
                         {/* Main Chat Input: ChatInput */}
-                        <ChatInput onSendMessage={newChat} className={styles.heroChatInputContainer} selectedModel={selectedModel} onModelChange={handleModelChange}></ChatInput>
+                        <ChatInput onSendMessage={newChat} className={styles.heroChatInputContainer}  onModelChange={handleModelChange}></ChatInput>
                     </div>
                 </section>
             )}

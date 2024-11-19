@@ -51,7 +51,7 @@ export default function ChatMessage({
         <div className="flex flex-col h-full overflow-hidden">
             {chat && (
                 <div className="flex items-center gap-3 p-4 border-b border-gray-200 bg-white">
-                    <Forum className="text-purple-600" />
+                    <Forum className="text-white" />
                     <h1 className="text-gray-800 font-medium">{chat.title}</h1>
                 </div>
             )}
@@ -62,17 +62,17 @@ export default function ChatMessage({
                         key={msg.message_id}
                         className={`chat-message ${msg.role === 'user' ? 'chat-message-user' : 'chat-message-assistant'}`}
                     >
-                        <div className={`p-2 rounded-full ${msg.role === 'assistant' ? 'bg-purple-100' :
-                            msg.role === 'cnn' ? 'bg-pink-100' : 'bg-gray-100'
+                        <div className={`p-2 rounded-full ${msg.role === 'assistant' ? 'bg-white' :
+                            msg.role === 'cnn' ? 'bg-white' : 'bg-gray-100'
                             }`}>
-                            {msg.role === 'assistant' && <SmartToy className="text-purple-600" />}
+                            {msg.role === 'assistant' && <SmartToy className="text-blue" />}
                             {msg.role === 'cnn' && <RemoveRedEye className="text-pink-600" />}
-                            {msg.role === 'user' && <Person className="text-gray-600" />}
+                            {msg.role === 'user' && <Person className="text-black" />}
                         </div>
 
-                        <div className={`rounded-2xl p-4 shadow-sm ${msg.role === 'user'
-                            ? 'bg-gradient-to-r from-purple-600 to-pink-500 text-white'
-                            : 'bg-white text-gray-800'
+                        <div className={`rounded-2xl p-4 ${msg.role === 'user'
+                            ? 'bg-white text-black'
+                            : 'bg-white text-black'
                             }`}>
                             {msg.image && (
                                 <img src={msg.image} alt="Chat" className="max-w-md rounded-lg mb-2" />

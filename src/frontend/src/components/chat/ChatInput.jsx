@@ -124,9 +124,9 @@ export default function ChatInput({
                 <textarea
                     ref={textAreaRef}
                     className="w-full bg-gray-100 border-0 rounded-lg px-4 py-3 pr-12 text-gray-800 
-                             placeholder-gray-500 focus:ring-2 focus:ring-purple-500 min-h-[24px] 
+                             placeholder-gray-500 focus:ring-white-2 focus:ring-white-500 min-h-[24px] 
                              max-h-[400px] resize-none overflow-hidden leading-relaxed"
-                    placeholder="How can AI Assistant help you today?"
+                    placeholder="How can Moodsync help you today?"
                     value={message}
                     onChange={handleMessageChange}
                     onKeyDown={handleKeyPress}
@@ -135,7 +135,7 @@ export default function ChatInput({
                 <button
                     className={`absolute right-2 bottom-2 p-2 rounded-full transition-all
                               ${message.trim() || selectedImage
-                            ? 'bg-gradient-to-r from-purple-600 to-pink-500 text-white hover:shadow-lg'
+                            ? 'bg-white text-black hover:shadow-lg'
                             : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
                     onClick={handleSubmit}
                     disabled={!message.trim() && !selectedImage}
@@ -167,13 +167,12 @@ export default function ChatInput({
                     </span>
                     <select
                         className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm
-                                 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                 focus:ring-white-2 focus:ring-white-500 focus:border-transparent"
                         value={selectedModel}
                         onChange={handleModelChange}
                         disabled={disableModelSelect}
                     >
                         <option value="llm">AI Assistant (LLM)</option>
-                        <option value="llm-cnn">AI Assistant (LLM + CNN)</option>
                         <option value="llm-rag">AI Expert (RAG)</option>
                         <option value="llm-agent">AI Expert (Agent)</option>
                     </select>
