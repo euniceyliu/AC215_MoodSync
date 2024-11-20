@@ -34,7 +34,8 @@ Ensure you have the correct permissions and GCP credentials in the secrets folde
 3. Open a new terminal window and navigate to `src/frontend`. Run `sh docker-shell.sh` to start the container and run `npm dev run` to start the application. 
 
 **Demo**
-![Untitled Video November 19, 2024 11_31 PM (1)](https://github.com/user-attachments/assets/2af78de4-4533-4e04-84ab-4f8f19363c1c)
+
+![Untitled Video November 19, 2024 11_33 PM (3)](https://github.com/user-attachments/assets/fe0be7a0-8d0f-41ba-96f5-4817e4785796)
 
 
 ## Project's Key Components Overview
