@@ -15,9 +15,6 @@ MoodSync Group
 In this project, we aim to develop an AI-powered music recommendation tool. The tool will feature a chatbot designed to analyze text input from users about their current mood and music preferences, such as favorite artists and genres. Users can input descriptions of their feelings and musical tastes, and the chatbot will generate a personalized playlist tailored to their emotional state and preferences. It will be powered by a RAG model and fine-tuned models, making it a specialist in personalized music playlist curation.
 
 
-
-----
-
 ## Milestone 4 ##
 
 **Overview of this Milestone**
@@ -36,6 +33,8 @@ Ensure you have the correct permissions and GCP credentials in the secrets folde
 2. Navigate to `src/api-service`. Run `sh docker-shell.sh` to start the container and run `uvicorn_server`. Keep this container running.
 3. Open a new terminal window and navigate to `src/frontend`. Run `sh docker-shell.sh` to start the container and run `npm dev run` to start the application. 
 
+**Demo**
+<iframe src="https://drive.google.com/file/d/1wUkXAh0tubQsR-h66x-bWkb86CLHgmkN/preview" width="640" height="480"></iframe>
 
 ## Project's Key Components Overview
 
