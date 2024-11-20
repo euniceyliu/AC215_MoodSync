@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Music, Heart, Brain, Sparkles, Users, Lock, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function AboutPage() {
     const [hoveredFeature, setHoveredFeature] = useState(null);
@@ -35,17 +36,20 @@ export default function AboutPage() {
         {
             name: "Eunice Liu",
             role: "Co-Founder",
-            description: "Expert in emotional intelligence and music psychology"
+            description: "G2 MS in Data Science & flutist for 6 years & classical music enthusiast",
+            image: "/assets/mem1.png"
         },
         {
             name: "Megan Luu",
             role: "Co-Founder",
-            description: "Professional musician with 15 years of experience"
+            description: "G2 MS in Data Science & violinist/pianist for 8 years",
+            image: "/assets/mem2.png"
         },
         {
             name: "Xinyu Chen",
             role: "Co-Founder",
-            description: "Specialist in music therapy and emotional well-being"
+            description: "G2 MS in biomedical informatics & pianist & jack of all trades in music from singing to composing",
+            image: "/assets/mem3.png"
         }
     ];
 
@@ -85,7 +89,6 @@ export default function AboutPage() {
                 </div>
             </section>
 
-
             {/* Features Section */}
             <section className="h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white snap-start">
                 <div className="max-w-6xl mx-auto px-8">
@@ -113,8 +116,6 @@ export default function AboutPage() {
                 </div>
             </section>
 
-{/* Rest of the code remains the same */}
-
             {/* Team Section */}
             <section className="h-screen flex items-center justify-center bg-gradient-to-b from-white to-blue-100 snap-start">
                 <div className="max-w-6xl mx-auto px-8">
@@ -135,9 +136,11 @@ export default function AboutPage() {
                                 >
                                     <div className="relative w-32 h-32 mx-auto mb-4">
                                         <div className={`absolute inset-0 bg-blue-200 rounded-full transform transition-transform duration-500 ${hoveredMember === index ? 'scale-110' : ''}`} />
-                                        <img
-                                            src="/api/placeholder/128/128"
+                                        <Image
+                                            src={member.image}
                                             alt={member.name}
+                                            width={128}
+                                            height={128}
                                             className="relative rounded-full w-full h-full object-cover"
                                         />
                                     </div>
@@ -166,7 +169,7 @@ export default function AboutPage() {
                         </Link>
                     </div>
                 </div>
-        </section>
+            </section>
         </div>
     );
 }
