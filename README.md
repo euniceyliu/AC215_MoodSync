@@ -18,7 +18,7 @@ In this project, we aim to develop an AI-powered music recommendation tool. The 
 
 ----
 
-### Milestone 4 ###
+## Milestone 4 ##
 
 **Overview of this Milestone**
 
