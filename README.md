@@ -29,6 +29,13 @@ For this milestone, we implemented CI/CD workflows in GitHub Actions to test our
 2. APIs & Frontend Implementation: The functional code for the backend APIs and frontend can be found in the [`src/api-service`](src/api-service) and [`src/frontend`](src/frontend) folders, respectively. Each of the folders also have README.md files that describe the application components, setup instructions, and usage guidelines.
 3. Continuous Integration Setup, Automated Testing Implementation, Test Documentation: We have set up a Github Actions workflow to run our unit/integration tests and flake8 on every push, and it provides a coverage report as an artifact after the workflow run -- this can be found under the Actions tab. The GitHub Actions configuration file can be found under [`.github/workflows/test.yml`](.github/workflows/test.yml). The tests check the core functionality of some of the main components of our app pipeline. Detailed documentation of the tests can be found in [`src/tests`](src/tests).
 
+**Instructions for running the app**
+
+Ensure you have the correct permissions and GCP credentials in the secrets folder. 
+1. Open a terminal window and navigate to `src/vector-db`. Run `sh docker-shell.sh` to start the container. Run `python llm_rag.py --load` to load the vector database collection. Keep this container running.
+2. Navigate to `src/api-service`. Run `sh docker-shell.sh` to start the container and run `uvicorn_server`. Keep this container running.
+3. Open a new terminal window and navigate to `src/frontend`. Run `sh docker-shell.sh` to start the container and run `npm dev run` to start the application. 
+
 
 ## Project's Key Components Overview
 
