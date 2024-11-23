@@ -278,7 +278,7 @@ def chat(method="semantic-split-full-lyrics"):
     return generated_text
 
 
-def agent(method="semantic-split-full-lyrics"):
+def agent(query, method="semantic-split-full-lyrics"):
     print("agent()")
     generative_model = GenerativeModel(
         GENERATIVE_MODEL, system_instruction=[SYSTEM_INSTRUCTION]
@@ -295,8 +295,7 @@ def agent(method="semantic-split-full-lyrics"):
         role="user",
         parts=[
             Part.from_text(
-                """I'm going for a drive along the coast. Give me
-                some upbeat, sunshiney pop songs, I like Khalid."""
+                query
             )
         ],
     )
@@ -348,7 +347,7 @@ def main(args=None):
     if args.chat:
         chat(method=args.chunk_type)
     if args.agent:
-        agent(method=args.chunk_type)
+        agent(query=args.querymessage, method=args.chunk_type)
 
 
 if __name__ == "__main__":
@@ -360,6 +359,11 @@ if __name__ == "__main__":
         "--query",
         action="store_true",
         help="Query vector db",
+    )
+    parser.add_argument(
+        "--querymessage",
+        type=str,
+        help="Message to query"
     )
     parser.add_argument(
         "--chunk_type",

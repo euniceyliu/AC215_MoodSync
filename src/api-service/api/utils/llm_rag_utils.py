@@ -15,7 +15,7 @@ from vertexai.generative_models import (
     ToolConfig,
 )
 
-#import agent_tools_utils
+from . import agent_tools_utils
 
 
 # Setup
@@ -274,7 +274,7 @@ def chat(query, method="semantic-split-full-lyrics"):
     return generated_text
 
 
-def agent(method="semantic-split-full-lyrics"):
+def agent(query, method="semantic-split-full-lyrics"):
     print("agent()")
     generative_model = GenerativeModel(
         GENERATIVE_MODEL, system_instruction=[SYSTEM_INSTRUCTION]
@@ -291,20 +291,18 @@ def agent(method="semantic-split-full-lyrics"):
         role="user",
         parts=[
             Part.from_text(
-                """I'm going for a drive along the coast. Give me
-                some upbeat, sunshiney pop songs, I like Khalid."""
+                query
             )
         ],
     )
 
     # Step 1: Prompt LLM to find the tool(s) to execute
-    print("user_prompt_content: ", user_prompt_content)
     response = generative_model.generate_content(
         user_prompt_content,
         generation_config=GenerationConfig(
             temperature=0
         ),  # Configuration settings
-        tools=[agent_tools.music_expert_tool],  # Tools available to the model
+        tools=[agent_tools_utils.music_expert_tool],  # Tools available to the model
         tool_config=ToolConfig(
             function_calling_config=ToolConfig.FunctionCallingConfig(
                 # ANY mode forces the model to predict only function calls
@@ -312,12 +310,10 @@ def agent(method="semantic-split-full-lyrics"):
             )
         ),
     )
-    print("LLM Response:", response)
 
     # Step 2: Execute the function and send chunks back to LLM to answer
     function_calls = response.candidates[0].function_calls
-    print("Function calls:")
-    function_responses = agent_tools.execute_function_calls(
+    function_responses = agent_tools_utils.execute_function_calls(
         function_calls, collection, embed_func=generate_query_embedding
     )
     if len(function_responses) == 0:
@@ -330,9 +326,9 @@ def agent(method="semantic-split-full-lyrics"):
                 response.candidates[0].content,  # Function call response
                 Content(parts=function_responses),
             ],
-            tools=[agent_tools.music_expert_tool],
+            tools=[agent_tools_utils.music_expert_tool],
         )
-        print("LLM Response:", response)
+        return response.text
 
 
 def main(args=None):
