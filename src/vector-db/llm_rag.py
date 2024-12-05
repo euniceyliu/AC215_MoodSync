@@ -27,8 +27,8 @@ GENERATIVE_MODEL = "gemini-1.5-flash-002"
 # use test dataset for now
 INPUT_DATA = "gs://rag_data_song/input/combined_df_test.csv"
 OUTPUT_FOLDER = "gs://rag_data_song/output"
-CHROMADB_HOST = "llm-rag-chromadb-chat"
-CHROMADB_PORT = 8000
+CHROMADB_HOST = "vector-db"
+CHROMADB_PORT = "8000"
 vertexai.init(project=GCP_PROJECT, location=GCP_LOCATION)
 
 SYSTEM_INSTRUCTION = """
