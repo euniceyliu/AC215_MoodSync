@@ -7,7 +7,7 @@ echo $args
 
 if [[ -z ${args} ]];
 then
-    pipenv shell
+    pipenv run python llm_rag.py --load
 else
   pipenv run python llm_rag.py --load
 fi
