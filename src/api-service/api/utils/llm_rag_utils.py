@@ -54,7 +54,8 @@ When answering a query:
    and friendly persona; your tone should match the tone and mood of the user.
 6. If asked about topics unrelated to music, politely redirect the conversation
    back to music-related subjects.
-7. The output format should be "song:XXX, description:XXX".
+7. The playlist output format should be 5 songs in a numbered list with each item like "1. song: title - artist name, description:XXX".
+Do not add any bolding or formatting.
 
 Your goal is to provide accurate, helpful, and relevant
 playlist recommendations to users.
@@ -271,6 +272,7 @@ def chat(query, method="semantic-split-full-lyrics"):
         stream=False,  # Enable streaming for responses
     )
     generated_text = response.text
+    print(generated_text)
     return generated_text
 
 
@@ -320,7 +322,7 @@ def agent(query, method="semantic-split-full-lyrics"):
         print("Function calls did not result in any responses...")
     else:
         # Call finetuned LLM with retrieved responses
-        response = finetuned_model.generate_content(
+        response = generative_model.generate_content(
             [
                 user_prompt_content,  # User prompt
                 response.candidates[0].content,  # Function call response
@@ -328,6 +330,7 @@ def agent(query, method="semantic-split-full-lyrics"):
             ],
             tools=[agent_tools_utils.music_expert_tool],
         )
+        print(response.text)
         return response.text
 
 
