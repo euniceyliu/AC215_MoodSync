@@ -61,7 +61,7 @@ export default function PlaylistPage() {
             setIsGenerating(true);
             
             try {
-                const response = await DataService.chatWithLLM(newUserMessage);
+                const response = await DataService.chatWithLLMAgent(newUserMessage);
                 const conversationalPart = extractConversationalResponse(response.response);
                 
                 // Add assistant message
