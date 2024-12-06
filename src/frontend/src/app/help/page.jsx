@@ -33,21 +33,15 @@ export default function HelpPage() {
     const supportResources = [
         {
             icon: <BookOpen className="w-6 h-6" />,
-            title: "User Guide",
-            description: "Step-by-step guides and tutorials to help you get the most out of MoodSync",
-            link: "/guide"
-        },
-        {
-            icon: <MessageSquare className="w-6 h-6" />,
-            title: "Community Forum",
-            description: "Connect with other users, share experiences, and get tips",
-            link: "/community"
+            title: "Github",
+            description: "See how our app is built!",
+            link: "https://github.com/euniceyliu/AC215_MoodSync/tree/main"
         },
         {
             icon: <HelpCircle className="w-6 h-6" />,
             title: "Video Tutorials",
-            description: "Watch detailed explanations of all MoodSync features",
-            link: "/tutorials"
+            description: "Watch demo all MoodSync features",
+            link: "https://drive.google.com/file/d/1-SdE9I0-Jay69HgNyfhcPXrIcwVArAYX/view?usp=sharing"
         }
     ];
 
@@ -93,21 +87,21 @@ export default function HelpPage() {
             </div>
 
             {/* Support Resources */}
-            <div className="max-w-6xl mx-auto px-8 mb-16">
+            <div className="max-w-4xl mx-auto px-8 mb-16">
                 <h2 className="text-3xl font-bold text-blue-950 mb-8 text-center">Support Resources</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
                     {supportResources.map((resource, index) => (
                         <div 
                             key={index}
-                            className="bg-white rounded-lg p-6 group hover:shadow-xl transition-shadow duration-300 border border-blue-100"
+                            className="bg-white rounded-lg p-6 shadow-sm hover:shadow-xl transition-shadow duration-300"
                         >
-                            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors duration-300">
-                                <div className="text-blue-700">
+                            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                                <div className="text-blue-600">
                                     {resource.icon}
                                 </div>
                             </div>
                             <h3 className="text-xl font-bold text-blue-950 mb-2">{resource.title}</h3>
-                            <p className="text-blue-700 mb-4">{resource.description}</p>
+                            <p className="text-blue-600 mb-4">{resource.description}</p>
                             <Link 
                                 href={resource.link}
                                 className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
