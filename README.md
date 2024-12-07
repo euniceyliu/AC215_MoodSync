@@ -29,27 +29,37 @@ Ensure that you have the required GCP credentials (i.e. deployment.json, gcp-ser
 
 - Deployment instructions:
 
-Navigate to the `src/deployment` folder.
+  1. Navigate to the `src/deployment` folder.
 
-Run `sh docker-shell.sh` to start the container for deployment.
+  2. Run `sh docker-shell.sh` to start the container for deployment.
 
-If the app Docker images have never been pushed to the GCR before, run:
+  3. If the app Docker images have never been pushed to the GCR before, run:
 
-```ansible-playbook deploy-docker-images.yml -i inventory.yml```
+  ```ansible-playbook deploy-docker-images.yml -i inventory.yml```
 
-To start the Kubernetes cluster and deploy the application, run:
+  4. To start the Kubernetes cluster and deploy the application, run:
 
-```ansible-playbook deploy-k8s-cluster.yml -i inventory.yml --extra-vars cluster_state=present```
+  ```ansible-playbook deploy-k8s-cluster.yml -i inventory.yml --extra-vars cluster_state=present```
 
-(note that this will take some time if the cluster is not already running)
+  (note that this will take some time if the cluster is not already running)
 
-The terminal will output an `nginx_ingress_ip`, and the application is now accessible at `http://<YOUR INGRESS IP>.sslip.io`.
+  5. The terminal will output an `nginx_ingress_ip`, and the application is now accessible at `http://<YOUR INGRESS IP>.sslip.io`.
 
 - Usage details and examples:
-
   
+The application can be used to request playlist recommendations based on one's music preferences and current mood. Users can input their current status as well artists, genres, and/or song topics that they prefer in order to get their custom playlist.
+
+Example #1: Asking for playlist by genre
+
+\[add screenshot\]
+
+Example #2: Asking for playlist by artist and song topic
+
+\[add screenshot\]
   
 - Known issues and limitations:
+  
+Currently, a limitation of our application is that the music database used for RAG does not automatically incorporate new music as it comes out. Thus, the playlist recommendations does not update with new music over time. To address this limitation, future work would involve developing a pipeline to scrape data from Genius.com as new lyrics and annotations for songs come out, and incorporate them into our vector database.
 
 **Demo**
 
