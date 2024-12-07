@@ -15,23 +15,41 @@ MoodSync Group
 In this project, we aim to develop an AI-powered music recommendation tool. The tool will feature a chatbot designed to analyze text input from users about their current mood and music preferences, such as favorite artists and genres. Users can input descriptions of their feelings and musical tastes, and the chatbot will generate a personalized playlist tailored to their emotional state and preferences. It will be powered by a RAG model and fine-tuned models, making it a specialist in personalized music playlist curation.
 
 
-## Milestone 4 ##
+## Milestone 5 ##
 
 **Overview of this Milestone**
 
-For this milestone, we implemented CI/CD workflows in GitHub Actions to test our code, developed a functional front-end for our website with React, and created APIs for our source code to have robust integration between the frontend and backend of the user-facing application.
+For this final milestone, we used Ansible playbooks to automate the provisioning and deployment of our infrastructure and application to a Kubernetes cluster.
 
-**Milestone 4 Deliverables**
-1. Application Design Document: Our application design document detailing the solution and technical architecture can be found in this [Google Doc](https://docs.google.com/document/d/16WsrRdNQLMYpk2EwI2zTQYp2RJXBQh1r6QnW85Rp1cc/edit?usp=sharing).
-2. APIs & Frontend Implementation: The functional code for the backend APIs and frontend can be found in the [`src/api-service`](src/api-service) and [`src/frontend`](src/frontend) folders, respectively. Each of the folders also have README.md files that describe the application components, setup instructions, and usage guidelines.
-3. Continuous Integration Setup, Automated Testing Implementation, Test Documentation: We have set up a Github Actions workflow to run our unit/integration tests and flake8 on every push, and it provides a coverage report as an artifact after the workflow run -- this can be found under the Actions tab. The GitHub Actions configuration file can be found under [`.github/workflows/test.yml`](.github/workflows/test.yml). The tests check the core functionality of some of the main components of our app pipeline. Detailed documentation of the tests can be found in [`src/tests`](src/tests).
+**Instructions for deploying the app**
 
-**Instructions for running the app**
+- Prerequisites and setup instructions:
+  
+Ensure that you have the required GCP credentials (i.e. deployment.json, gcp-service.json) in the secrets folder.
 
-Ensure you have the correct permissions and GCP credentials in the secrets folder. 
-1. Open a terminal window and navigate to `src/vector-db`. Run `sh docker-shell.sh` to start the container. Run `python llm_rag.py --load` to load the vector database collection. Keep this container running.
-2. Navigate to `src/api-service`. Run `sh docker-shell.sh` to start the container and run `uvicorn_server`. Keep this container running.
-3. Open a new terminal window and navigate to `src/frontend`. Run `sh docker-shell.sh` to start the container and run `npm dev run` to start the application. 
+- Deployment instructions:
+
+Navigate to the `src/deployment` folder.
+
+Run `sh docker-shell.sh` to start the container for deployment.
+
+If the app Docker images have never been pushed to the GCR before, run:
+
+```ansible-playbook deploy-docker-images.yml -i inventory.yml```
+
+To start the Kubernetes cluster and deploy the application, run:
+
+```ansible-playbook deploy-k8s-cluster.yml -i inventory.yml --extra-vars cluster_state=present```
+
+(note that this will take some time if the cluster is not already running)
+
+The terminal will output an `nginx_ingress_ip`, and the application is now accessible at `http://<YOUR INGRESS IP>.sslip.io`.
+
+- Usage details and examples:
+
+  
+  
+- Known issues and limitations:
 
 **Demo**
 
