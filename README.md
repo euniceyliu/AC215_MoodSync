@@ -1,6 +1,6 @@
 
 
-# AC215 - Milestone4 - MoodSync: AI-Powered Playlists for Emotional Resonance
+# AC215 - Milestone 5 - MoodSync: AI-Powered Playlists for Emotional Resonance
 
 ## Project Information
 **Team Members**
