@@ -51,19 +51,17 @@ The application can be used to request playlist recommendations based on one's m
 
 Example #1: Asking for playlist by genre
 
-\[add screenshot\]
+https://github.com/user-attachments/assets/65a95946-437c-4609-8dea-8d9807c4a421
 
-Example #2: Asking for playlist by artist and song topic
 
-\[add screenshot\]
+Example #2: Asking for playlist by song topic
+
+https://github.com/user-attachments/assets/09d730c8-dfe6-485f-8480-217e3102cb28
+
   
 - Known issues and limitations:
   
 Currently, a limitation of our application is that the music database used for RAG does not automatically incorporate new music as it comes out. Thus, the playlist recommendations does not update with new music over time. To address this limitation, future work would involve developing a pipeline to scrape data from Genius.com as new lyrics and annotations for songs come out, and incorporate them into our vector database.
-
-**Demo**
-
-![Untitled Video November 19, 2024 11_33 PM (3)](https://github.com/user-attachments/assets/fe0be7a0-8d0f-41ba-96f5-4817e4785796)
 
 
 ## Project's Key Components Overview
