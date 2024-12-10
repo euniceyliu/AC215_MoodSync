@@ -61,7 +61,7 @@ https://github.com/user-attachments/assets/09d730c8-dfe6-485f-8480-217e3102cb28
   
 - Known issues and limitations:
   
-Currently, a limitation of our application is that the music database used for RAG does not automatically incorporate new music as it comes out. Thus, the playlist recommendations does not update with new music over time. To address this limitation, future work would involve developing a pipeline to scrape data from Genius.com as new lyrics and annotations for songs come out, and incorporate them into our vector database.
+Currently, a limitation of our application is that the music database used for RAG does not automatically incorporate new music as it comes out. Thus, the playlist recommendations does not update with new music over time. To address this limitation, future work would involve developing a pipeline to scrape data from Genius.com as new lyrics and annotations for songs come out, and incorporate them into our vector database. Another limitation is that the application currently does not support conversation memory - thus, users are unable to continue their previous conversation and amend playlists based on what the chatbot has previously learned about them. 
 
 
 ## Project's Key Components Overview
