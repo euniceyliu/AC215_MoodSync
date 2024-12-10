@@ -19,13 +19,13 @@ In this project, we aim to develop an AI-powered music recommendation tool. The 
 
 **Overview of this Milestone**
 
-For this final milestone, we used Ansible playbooks to automate the provisioning and deployment of our infrastructure and application to a Kubernetes cluster.
+For this final milestone, we used Ansible playbooks to automate the provisioning and deployment of our infrastructure and application to a Kubernetes cluster. We also have a working CI/CD pipeline which runs unit tests (`.github/workflows/test.yml`) and automates the deployment of updates upon pushes to the main branch (`.github/workflows/deployment-cicd.yml`). We demonstrate the full machine learning workflow, starting from data preprocessing in the `src/dataset-creation` and `src/datapipeline` folders, to the model training and evaluation in `src/finetune-llm` folder.
 
 **Instructions for deploying the app**
 
 - Prerequisites and setup instructions:
   
-Ensure that you have the required GCP credentials (i.e. deployment.json, gcp-service.json) in the secrets folder.
+Ensure that you have the required GCP credentials (i.e. deployment.json, gcp-service.json) in the secrets folder. These credentials should allow permission to Compute Admin, Compute OS Login, Container Registry Service Agent, Kubernetes  Engine Admin, Service Account User, Storage Admin, Vertex AI Administrator, and Artifact Registry Administrator roles.
 
 - Deployment instructions:
 
@@ -86,6 +86,9 @@ Currently, a limitation of our application is that the music database used for R
 
 7.**`src/tests`**
    This folder contains unit tests and integration tests that run with Github Actions workflow to ensure efficient testing of our code with every push.
+
+8.**`src/deployment`**
+   This folder contains Ansible playbook and relevant files to deploy the application to Kubernetes cluster.
 
 ## Directory
 
